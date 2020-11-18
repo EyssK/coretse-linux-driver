@@ -1,0 +1,527 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+ALTERA_DTYPE_MSGDMA	altera_tse.h	382;"	d
+ALTERA_DTYPE_SGDMA	altera_tse.h	381;"	d
+ALTERA_RXDMABUFFER_SIZE	altera_tse_main.c	73;"	d	file:
+ALTERA_TSE_MAC_FIFO_WIDTH	altera_tse.h	32;"	d
+ALTERA_TSE_PAUSE_QUANTA	altera_tse.h	50;"	d
+ALTERA_TSE_RESOURCE_NAME	altera_tse.h	23;"	d
+ALTERA_TSE_RX_ALMOST_EMPTY	altera_tse.h	38;"	d
+ALTERA_TSE_RX_ALMOST_FULL	altera_tse.h	39;"	d
+ALTERA_TSE_RX_CMD_STAT_RX_SHIFT16	altera_tse.h	366;"	d
+ALTERA_TSE_RX_SECTION_EMPTY	altera_tse.h	36;"	d
+ALTERA_TSE_RX_SECTION_FULL	altera_tse.h	37;"	d
+ALTERA_TSE_SW_RESET_WATCHDOG_CNTR	altera_tse.h	31;"	d
+ALTERA_TSE_TX_ALMOST_EMPTY	altera_tse.h	44;"	d
+ALTERA_TSE_TX_ALMOST_FULL	altera_tse.h	45;"	d
+ALTERA_TSE_TX_CMD_STAT_OMIT_CRC	altera_tse.h	364;"	d
+ALTERA_TSE_TX_CMD_STAT_TX_SHIFT16	altera_tse.h	365;"	d
+ALTERA_TSE_TX_IPG_LENGTH	altera_tse.h	48;"	d
+ALTERA_TSE_TX_SECTION_EMPTY	altera_tse.h	42;"	d
+ALTERA_TSE_TX_SECTION_FULL	altera_tse.h	43;"	d
+GET_BIT_VALUE	altera_tse.h	52;"	d
+MAC_CMDCFG_CNTL_FRM_ENA	altera_tse.h	77;"	d
+MAC_CMDCFG_CNTL_FRM_ENA_GET	altera_tse.h	105;"	d
+MAC_CMDCFG_CNT_RESET	altera_tse.h	82;"	d
+MAC_CMDCFG_CNT_RESET_GET	altera_tse.h	110;"	d
+MAC_CMDCFG_CRC_FWD	altera_tse.h	62;"	d
+MAC_CMDCFG_CRC_FWD_GET	altera_tse.h	90;"	d
+MAC_CMDCFG_DISABLE_READ_TIMEOUT	altera_tse.h	81;"	d
+MAC_CMDCFG_DISABLE_READ_TIMEOUT_GET	altera_tse.h	109;"	d
+MAC_CMDCFG_ENA_10	altera_tse.h	79;"	d
+MAC_CMDCFG_ENA_10_GET	altera_tse.h	107;"	d
+MAC_CMDCFG_ETH_SPEED	altera_tse.h	59;"	d
+MAC_CMDCFG_ETH_SPEED_GET	altera_tse.h	87;"	d
+MAC_CMDCFG_EXCESS_COL	altera_tse.h	67;"	d
+MAC_CMDCFG_EXCESS_COL_GET	altera_tse.h	95;"	d
+MAC_CMDCFG_HD_ENA	altera_tse.h	66;"	d
+MAC_CMDCFG_HD_ENA_GET	altera_tse.h	94;"	d
+MAC_CMDCFG_LATE_COL	altera_tse.h	68;"	d
+MAC_CMDCFG_LATE_COL_GET	altera_tse.h	96;"	d
+MAC_CMDCFG_LOOP_ENA	altera_tse.h	71;"	d
+MAC_CMDCFG_LOOP_ENA_GET	altera_tse.h	99;"	d
+MAC_CMDCFG_MAGIC_ENA	altera_tse.h	73;"	d
+MAC_CMDCFG_MAGIC_ENA_GET	altera_tse.h	101;"	d
+MAC_CMDCFG_MHASH_SEL	altera_tse.h	70;"	d
+MAC_CMDCFG_MHASH_SEL_GET	altera_tse.h	98;"	d
+MAC_CMDCFG_NO_LGTH_CHECK	altera_tse.h	78;"	d
+MAC_CMDCFG_NO_LGTH_CHECK_GET	altera_tse.h	106;"	d
+MAC_CMDCFG_PAD_EN	altera_tse.h	61;"	d
+MAC_CMDCFG_PAD_EN_GET	altera_tse.h	89;"	d
+MAC_CMDCFG_PAUSE_FWD	altera_tse.h	63;"	d
+MAC_CMDCFG_PAUSE_FWD_GET	altera_tse.h	91;"	d
+MAC_CMDCFG_PAUSE_IGNORE	altera_tse.h	64;"	d
+MAC_CMDCFG_PAUSE_IGNORE_GET	altera_tse.h	92;"	d
+MAC_CMDCFG_PROMIS_EN	altera_tse.h	60;"	d
+MAC_CMDCFG_PROMIS_EN_GET	altera_tse.h	88;"	d
+MAC_CMDCFG_RX_ENA	altera_tse.h	57;"	d
+MAC_CMDCFG_RX_ENA_GET	altera_tse.h	85;"	d
+MAC_CMDCFG_RX_ERR_DISC	altera_tse.h	80;"	d
+MAC_CMDCFG_RX_ERR_DISC_GET	altera_tse.h	108;"	d
+MAC_CMDCFG_SLEEP	altera_tse.h	74;"	d
+MAC_CMDCFG_SLEEP_GET	altera_tse.h	102;"	d
+MAC_CMDCFG_SW_RESET	altera_tse.h	69;"	d
+MAC_CMDCFG_SW_RESET_GET	altera_tse.h	97;"	d
+MAC_CMDCFG_TX_ADDR_INS	altera_tse.h	65;"	d
+MAC_CMDCFG_TX_ADDR_INS_GET	altera_tse.h	93;"	d
+MAC_CMDCFG_TX_ADDR_SEL	altera_tse.h	72;"	d
+MAC_CMDCFG_TX_ADDR_SEL_GET	altera_tse.h	100;"	d
+MAC_CMDCFG_TX_ENA	altera_tse.h	56;"	d
+MAC_CMDCFG_TX_ENA_GET	altera_tse.h	84;"	d
+MAC_CMDCFG_WAKEUP	altera_tse.h	75;"	d
+MAC_CMDCFG_WAKEUP_GET	altera_tse.h	103;"	d
+MAC_CMDCFG_XOFF_GEN	altera_tse.h	76;"	d
+MAC_CMDCFG_XOFF_GEN_GET	altera_tse.h	104;"	d
+MAC_CMDCFG_XON_GEN	altera_tse.h	58;"	d
+MAC_CMDCFG_XON_GEN_GET	altera_tse.h	86;"	d
+MSGDMA_CSR_CTL_GLOBAL_INTR	altera_msgdmahw.h	122;"	d
+MSGDMA_CSR_CTL_RESET	altera_msgdmahw.h	119;"	d
+MSGDMA_CSR_CTL_STOP	altera_msgdmahw.h	118;"	d
+MSGDMA_CSR_CTL_STOP_DESCS	altera_msgdmahw.h	123;"	d
+MSGDMA_CSR_CTL_STOP_ON_EARLY	altera_msgdmahw.h	121;"	d
+MSGDMA_CSR_CTL_STOP_ON_ERR	altera_msgdmahw.h	120;"	d
+MSGDMA_CSR_RD_FILL_LEVEL_GET	altera_msgdmahw.h	128;"	d
+MSGDMA_CSR_RESP_FILL_LEVEL_GET	altera_msgdmahw.h	129;"	d
+MSGDMA_CSR_STAT_BUSY	altera_msgdmahw.h	92;"	d
+MSGDMA_CSR_STAT_BUSY_GET	altera_msgdmahw.h	105;"	d
+MSGDMA_CSR_STAT_DESC_BUF_EMPTY	altera_msgdmahw.h	93;"	d
+MSGDMA_CSR_STAT_DESC_BUF_EMPTY_GET	altera_msgdmahw.h	106;"	d
+MSGDMA_CSR_STAT_DESC_BUF_FULL	altera_msgdmahw.h	94;"	d
+MSGDMA_CSR_STAT_DESC_BUF_FULL_GET	altera_msgdmahw.h	107;"	d
+MSGDMA_CSR_STAT_IRQ	altera_msgdmahw.h	101;"	d
+MSGDMA_CSR_STAT_IRQ_GET	altera_msgdmahw.h	114;"	d
+MSGDMA_CSR_STAT_MASK	altera_msgdmahw.h	102;"	d
+MSGDMA_CSR_STAT_MASK_WITHOUT_IRQ	altera_msgdmahw.h	103;"	d
+MSGDMA_CSR_STAT_RESETTING	altera_msgdmahw.h	98;"	d
+MSGDMA_CSR_STAT_RESETTING_GET	altera_msgdmahw.h	111;"	d
+MSGDMA_CSR_STAT_RESP_BUF_EMPTY	altera_msgdmahw.h	95;"	d
+MSGDMA_CSR_STAT_RESP_BUF_EMPTY_GET	altera_msgdmahw.h	108;"	d
+MSGDMA_CSR_STAT_RESP_BUF_FULL	altera_msgdmahw.h	96;"	d
+MSGDMA_CSR_STAT_RESP_BUF_FULL_GET	altera_msgdmahw.h	109;"	d
+MSGDMA_CSR_STAT_STOPPED	altera_msgdmahw.h	97;"	d
+MSGDMA_CSR_STAT_STOPPED_GET	altera_msgdmahw.h	110;"	d
+MSGDMA_CSR_STAT_STOPPED_ON_EARLY	altera_msgdmahw.h	100;"	d
+MSGDMA_CSR_STAT_STOPPED_ON_EARLY_GET	altera_msgdmahw.h	113;"	d
+MSGDMA_CSR_STAT_STOPPED_ON_ERR	altera_msgdmahw.h	99;"	d
+MSGDMA_CSR_STAT_STOPPED_ON_ERR_GET	altera_msgdmahw.h	112;"	d
+MSGDMA_CSR_WR_FILL_LEVEL_GET	altera_msgdmahw.h	127;"	d
+MSGDMA_DESC_CTL_EARLY_DONE	altera_msgdmahw.h	41;"	d
+MSGDMA_DESC_CTL_EARLY_IRQ	altera_msgdmahw.h	39;"	d
+MSGDMA_DESC_CTL_END_ON_EOP	altera_msgdmahw.h	36;"	d
+MSGDMA_DESC_CTL_END_ON_LEN	altera_msgdmahw.h	37;"	d
+MSGDMA_DESC_CTL_GEN_EOP	altera_msgdmahw.h	33;"	d
+MSGDMA_DESC_CTL_GEN_SOP	altera_msgdmahw.h	32;"	d
+MSGDMA_DESC_CTL_GO	altera_msgdmahw.h	45;"	d
+MSGDMA_DESC_CTL_PARK_READS	altera_msgdmahw.h	34;"	d
+MSGDMA_DESC_CTL_PARK_WRITES	altera_msgdmahw.h	35;"	d
+MSGDMA_DESC_CTL_RX_SINGLE	altera_msgdmahw.h	63;"	d
+MSGDMA_DESC_CTL_SET_CH	altera_msgdmahw.h	31;"	d
+MSGDMA_DESC_CTL_TR_COMP_IRQ	altera_msgdmahw.h	38;"	d
+MSGDMA_DESC_CTL_TR_ERR_IRQ	altera_msgdmahw.h	40;"	d
+MSGDMA_DESC_CTL_TX_FIRST	altera_msgdmahw.h	49;"	d
+MSGDMA_DESC_CTL_TX_LAST	altera_msgdmahw.h	54;"	d
+MSGDMA_DESC_CTL_TX_MIDDLE	altera_msgdmahw.h	52;"	d
+MSGDMA_DESC_CTL_TX_SINGLE	altera_msgdmahw.h	58;"	d
+MSGDMA_DESC_RX_STRIDE	altera_msgdmahw.h	73;"	d
+MSGDMA_DESC_TX_STRIDE	altera_msgdmahw.h	72;"	d
+MSGDMA_RESP_EARLY_TERM	altera_msgdmahw.h	144;"	d
+MSGDMA_RESP_ERR_MASK	altera_msgdmahw.h	145;"	d
+POLL_PHY	altera_tse_main.c	66;"	d	file:
+RX_DESCRIPTORS	altera_tse_main.c	55;"	d	file:
+SGDMA_CONTROL_EOP	altera_sgdmahw.h	52;"	d
+SGDMA_CONTROL_HW_OWNED	altera_sgdmahw.h	58;"	d
+SGDMA_CONTROL_RD_FIXED	altera_sgdmahw.h	53;"	d
+SGDMA_CONTROL_WR_FIXED	altera_sgdmahw.h	54;"	d
+SGDMA_CTRLREG_CLRINT	altera_sgdmahw.h	114;"	d
+SGDMA_CTRLREG_COBHW	altera_sgdmahw.h	112;"	d
+SGDMA_CTRLREG_IDESCRIP	altera_sgdmahw.h	105;"	d
+SGDMA_CTRLREG_ILASTD	altera_sgdmahw.h	106;"	d
+SGDMA_CTRLREG_INTEN	altera_sgdmahw.h	107;"	d
+SGDMA_CTRLREG_INTMAX	altera_sgdmahw.h	110;"	d
+SGDMA_CTRLREG_IOE	altera_sgdmahw.h	103;"	d
+SGDMA_CTRLREG_IOEOP	altera_sgdmahw.h	104;"	d
+SGDMA_CTRLREG_POLL	altera_sgdmahw.h	113;"	d
+SGDMA_CTRLREG_RESET	altera_sgdmahw.h	111;"	d
+SGDMA_CTRLREG_START	altera_sgdmahw.h	108;"	d
+SGDMA_CTRLREG_STOPERR	altera_sgdmahw.h	109;"	d
+SGDMA_DESC_LEN	altera_sgdmahw.h	42;"	d
+SGDMA_STATUS_COLL_ERR	altera_sgdmahw.h	49;"	d
+SGDMA_STATUS_CRC_ERR	altera_sgdmahw.h	46;"	d
+SGDMA_STATUS_EOP	altera_sgdmahw.h	50;"	d
+SGDMA_STATUS_ERR	altera_sgdmahw.h	44;"	d
+SGDMA_STATUS_LENGTH_ERR	altera_sgdmahw.h	45;"	d
+SGDMA_STATUS_PHY_ERR	altera_sgdmahw.h	48;"	d
+SGDMA_STATUS_TRUNC_ERR	altera_sgdmahw.h	47;"	d
+SGDMA_STSREG_BUSY	altera_sgdmahw.h	101;"	d
+SGDMA_STSREG_CHAIN	altera_sgdmahw.h	100;"	d
+SGDMA_STSREG_DESCRIP	altera_sgdmahw.h	99;"	d
+SGDMA_STSREG_EOP	altera_sgdmahw.h	98;"	d
+SGDMA_STSREG_ERR	altera_sgdmahw.h	97;"	d
+SGMII_PCS_DIS_READ_TO	altera_tse.h	119;"	d
+SGMII_PCS_IF_MODE	altera_tse.h	118;"	d
+SGMII_PCS_LINK_TIMER_0	altera_tse.h	116;"	d
+SGMII_PCS_LINK_TIMER_1	altera_tse.h	117;"	d
+SGMII_PCS_READ_TO	altera_tse.h	120;"	d
+SGMII_PCS_REV	altera_tse.h	115;"	d
+SGMII_PCS_SCRATCH	altera_tse.h	114;"	d
+SGMII_PCS_SW_RESET_TIMEOUT	altera_tse.h	121;"	d
+SRC	Makefile	/^SRC := $(shell pwd)$/;"	m
+TSE_NUM_REGS	altera_tse_ethtool.c	27;"	d	file:
+TSE_STATS_LEN	altera_tse_ethtool.c	26;"	d	file:
+TSE_TX_THRESH	altera_tse_main.c	78;"	d	file:
+TXQUEUESTOP_THRESHHOLD	altera_tse_main.c	80;"	d	file:
+TX_DESCRIPTORS	altera_tse_main.c	60;"	d	file:
+__ALTERA_MSGDMAHW_H__	altera_msgdmahw.h	7;"	d
+__ALTERA_MSGDMA_H__	altera_msgdma.h	7;"	d
+__ALTERA_SGDMAHW_H__	altera_sgdmahw.h	7;"	d
+__ALTERA_SGDMA_H__	altera_sgdma.h	7;"	d
+__ALTERA_TSE_H__	altera_tse.h	21;"	d
+__ALTERA_UTILS_H__	altera_utils.h	9;"	d
+__packed	altera_sgdmahw.h	/^} __packed;$/;"	v	typeref:struct:sgdma_descrip
+add_rx_desc	altera_tse.h	/^	void (*add_rx_desc)(struct altera_tse_private *, struct tse_buffer *);$/;"	m	struct:altera_dmaops
+added_unicast	altera_tse.h	/^	u32 added_unicast;$/;"	m	struct:altera_tse_private
+alignment_errors	altera_tse.h	/^	u32 alignment_errors;$/;"	m	struct:altera_tse_mac
+alloc_init_skbufs	altera_tse_main.c	/^static int alloc_init_skbufs(struct altera_tse_private *priv)$/;"	f	file:
+altera_dmaops	altera_tse.h	/^struct altera_dmaops {$/;"	s
+altera_dtype	altera_tse.h	/^	int altera_dtype;$/;"	m	struct:altera_dmaops
+altera_dtype_msgdma	altera_tse_main.c	/^static const struct altera_dmaops altera_dtype_msgdma = {$/;"	v	typeref:struct:altera_dmaops	file:
+altera_dtype_sgdma	altera_tse_main.c	/^static const struct altera_dmaops altera_dtype_sgdma = {$/;"	v	typeref:struct:altera_dmaops	file:
+altera_isr	altera_tse_main.c	/^static irqreturn_t altera_isr(int irq, void *dev_id)$/;"	f	file:
+altera_tse_adjust_link	altera_tse_main.c	/^static void altera_tse_adjust_link(struct net_device *dev)$/;"	f	file:
+altera_tse_driver	altera_tse_main.c	/^module_platform_driver(altera_tse_driver);$/;"	v
+altera_tse_driver	altera_tse_main.c	/^static struct platform_driver altera_tse_driver = {$/;"	v	typeref:struct:platform_driver	file:
+altera_tse_ids	altera_tse_main.c	/^static const struct of_device_id altera_tse_ids[] = {$/;"	v	typeref:struct:of_device_id	file:
+altera_tse_ids	altera_tse_main.c	/^static const struct of_device_id altera_tse_ids[];$/;"	v	typeref:struct:of_device_id	file:
+altera_tse_mac	altera_tse.h	/^struct altera_tse_mac {$/;"	s
+altera_tse_mdio	altera_tse.h	/^struct altera_tse_mdio {$/;"	s
+altera_tse_mdio_create	altera_tse_main.c	/^static int altera_tse_mdio_create(struct net_device *dev, unsigned int id)$/;"	f	file:
+altera_tse_mdio_destroy	altera_tse_main.c	/^static void altera_tse_mdio_destroy(struct net_device *dev)$/;"	f	file:
+altera_tse_mdio_read	altera_tse_main.c	/^static int altera_tse_mdio_read(struct mii_bus *bus, int mii_id, int regnum)$/;"	f	file:
+altera_tse_mdio_write	altera_tse_main.c	/^static int altera_tse_mdio_write(struct mii_bus *bus, int mii_id, int regnum,$/;"	f	file:
+altera_tse_netdev_ops	altera_tse_main.c	/^static struct net_device_ops altera_tse_netdev_ops = {$/;"	v	typeref:struct:net_device_ops	file:
+altera_tse_phy_get_addr_mdio_create	altera_tse_main.c	/^static int altera_tse_phy_get_addr_mdio_create(struct net_device *dev)$/;"	f	file:
+altera_tse_private	altera_tse.h	/^struct altera_tse_private {$/;"	s
+altera_tse_probe	altera_tse_main.c	/^static int altera_tse_probe(struct platform_device *pdev)$/;"	f	file:
+altera_tse_remove	altera_tse_main.c	/^static int altera_tse_remove(struct platform_device *pdev)$/;"	f	file:
+altera_tse_set_ethtool_ops	altera_tse_ethtool.c	/^void altera_tse_set_ethtool_ops(struct net_device *netdev)$/;"	f
+altera_tse_set_mcfilter	altera_tse_main.c	/^static void altera_tse_set_mcfilter(struct net_device *dev)$/;"	f	file:
+altera_tse_set_mcfilterall	altera_tse_main.c	/^static void altera_tse_set_mcfilterall(struct net_device *dev)$/;"	f	file:
+auto_negotiation_advertisement	altera_tse.h	/^	u32 auto_negotiation_advertisement;	\/* Auto-negotiation$/;"	m	struct:altera_tse_mdio
+burst_seq_num	altera_msgdmahw.h	/^	u32 burst_seq_num;	\/* bit 31:24 write burst$/;"	m	struct:msgdma_extended_desc
+bytes	altera_sgdmahw.h	/^	u16	bytes;$/;"	m	struct:sgdma_descrip
+bytes_transferred	altera_msgdmahw.h	/^	u32 bytes_transferred;$/;"	m	struct:msgdma_response
+bytes_xferred	altera_sgdmahw.h	/^	u16	bytes_xferred;	\/* 16 bits, bytes xferred *\/$/;"	m	struct:sgdma_descrip
+clear_rxirq	altera_tse.h	/^	void (*clear_rxirq)(struct altera_tse_private *);$/;"	m	struct:altera_dmaops
+clear_txirq	altera_tse.h	/^	void (*clear_txirq)(struct altera_tse_private *);$/;"	m	struct:altera_dmaops
+command_config	altera_tse.h	/^	u32 command_config;$/;"	m	struct:altera_tse_mac
+connect_local_phy	altera_tse_main.c	/^static struct phy_device *connect_local_phy(struct net_device *dev)$/;"	f	file:
+control	altera_msgdmahw.h	/^	u32 control;		\/* Read\/Write *\/$/;"	m	struct:msgdma_csr
+control	altera_msgdmahw.h	/^	u32 control;		\/* characteristics of the transfer *\/$/;"	m	struct:msgdma_extended_desc
+control	altera_sgdmahw.h	/^	u32	control;$/;"	m	struct:sgdma_csr
+control	altera_sgdmahw.h	/^	u8	control;$/;"	m	struct:sgdma_descrip
+control	altera_tse.h	/^	u32 control;	\/* PHY device operation control register *\/$/;"	m	struct:altera_tse_mdio
+csrrd16	altera_tse.h	/^u16 csrrd16(void __iomem *mac, size_t offs)$/;"	f
+csrrd32	altera_tse.h	/^u32 csrrd32(void __iomem *mac, size_t offs)$/;"	f
+csrrd8	altera_tse.h	/^u8 csrrd8(void __iomem *mac, size_t offs)$/;"	f
+csrwr16	altera_tse.h	/^void csrwr16(u16 val, void __iomem *mac, size_t offs)$/;"	f
+csrwr32	altera_tse.h	/^void csrwr32(u32 val, void __iomem *mac, size_t offs)$/;"	f
+csrwr8	altera_tse.h	/^void csrwr8(u8 val, void __iomem *mac, size_t offs)$/;"	f
+debug	altera_tse_main.c	/^static int debug = -1;$/;"	v	file:
+default_msg_level	altera_tse_main.c	/^static const u32 default_msg_level = (NETIF_MSG_DRV | NETIF_MSG_PROBE |$/;"	v	file:
+dequeue_rx	altera_sgdma.c	/^dequeue_rx(struct altera_tse_private *priv)$/;"	f	file:
+dequeue_tx	altera_sgdma.c	/^dequeue_tx(struct altera_tse_private *priv)$/;"	f	file:
+dev	altera_tse.h	/^	struct net_device *dev;$/;"	m	struct:altera_tse_private	typeref:struct:altera_tse_private::net_device
+device	altera_tse.h	/^	struct device *device;$/;"	m	struct:altera_tse_private	typeref:struct:altera_tse_private::device
+disable_rxirq	altera_tse.h	/^	void (*disable_rxirq)(struct altera_tse_private *);$/;"	m	struct:altera_dmaops
+disable_txirq	altera_tse.h	/^	void (*disable_txirq)(struct altera_tse_private *);$/;"	m	struct:altera_dmaops
+dma_addr	altera_tse.h	/^	dma_addr_t dma_addr;$/;"	m	struct:tse_buffer
+dma_rx_num	altera_tse_main.c	/^static int dma_rx_num = RX_DESCRIPTORS;$/;"	v	file:
+dma_tx_num	altera_tse_main.c	/^static int dma_tx_num = TX_DESCRIPTORS;$/;"	v	file:
+dmamask	altera_tse.h	/^	int dmamask;$/;"	m	struct:altera_dmaops
+dmaops	altera_tse.h	/^	struct altera_dmaops *dmaops;$/;"	m	struct:altera_tse_private	typeref:struct:altera_tse_private::altera_dmaops
+enable_rxirq	altera_tse.h	/^	void (*enable_rxirq)(struct altera_tse_private *);$/;"	m	struct:altera_dmaops
+enable_txirq	altera_tse.h	/^	void (*enable_txirq)(struct altera_tse_private *);$/;"	m	struct:altera_dmaops
+ether_stats_drop_events	altera_tse.h	/^	u32 ether_stats_drop_events;$/;"	m	struct:altera_tse_mac
+ether_stats_fragments	altera_tse.h	/^	u32 ether_stats_fragments;$/;"	m	struct:altera_tse_mac
+ether_stats_jabbers	altera_tse.h	/^	u32 ether_stats_jabbers;$/;"	m	struct:altera_tse_mac
+ether_stats_octets	altera_tse.h	/^	u32 ether_stats_octets;$/;"	m	struct:altera_tse_mac
+ether_stats_oversize_pkts	altera_tse.h	/^	u32 ether_stats_oversize_pkts;$/;"	m	struct:altera_tse_mac
+ether_stats_pkts	altera_tse.h	/^	u32 ether_stats_pkts;$/;"	m	struct:altera_tse_mac
+ether_stats_pkts_1024to1518_octets	altera_tse.h	/^	u32 ether_stats_pkts_1024to1518_octets;$/;"	m	struct:altera_tse_mac
+ether_stats_pkts_128to255_octets	altera_tse.h	/^	u32 ether_stats_pkts_128to255_octets;$/;"	m	struct:altera_tse_mac
+ether_stats_pkts_1519tox_octets	altera_tse.h	/^	u32 ether_stats_pkts_1519tox_octets;$/;"	m	struct:altera_tse_mac
+ether_stats_pkts_256to511_octets	altera_tse.h	/^	u32 ether_stats_pkts_256to511_octets;$/;"	m	struct:altera_tse_mac
+ether_stats_pkts_512to1023_octets	altera_tse.h	/^	u32 ether_stats_pkts_512to1023_octets;$/;"	m	struct:altera_tse_mac
+ether_stats_pkts_64_octets	altera_tse.h	/^	u32 ether_stats_pkts_64_octets;$/;"	m	struct:altera_tse_mac
+ether_stats_pkts_65to127_octets	altera_tse.h	/^	u32 ether_stats_pkts_65to127_octets;$/;"	m	struct:altera_tse_mac
+ether_stats_undersize_pkts	altera_tse.h	/^	u32 ether_stats_undersize_pkts;$/;"	m	struct:altera_tse_mac
+frames_check_sequence_errors	altera_tse.h	/^	u32 frames_check_sequence_errors;$/;"	m	struct:altera_tse_mac
+frames_received_ok	altera_tse.h	/^	u32 frames_received_ok;$/;"	m	struct:altera_tse_mac
+frames_transmitted_ok	altera_tse.h	/^	u32 frames_transmitted_ok;$/;"	m	struct:altera_tse_mac
+free_skbufs	altera_tse_main.c	/^static void free_skbufs(struct net_device *dev)$/;"	f	file:
+frm_length	altera_tse.h	/^	u32 frm_length;$/;"	m	struct:altera_tse_mac
+get_rx_status	altera_tse.h	/^	u32 (*get_rx_status)(struct altera_tse_private *);$/;"	m	struct:altera_dmaops
+hash_filter	altera_tse.h	/^	u32 hash_filter;$/;"	m	struct:altera_tse_private
+hash_table	altera_tse.h	/^	u32 hash_table[64];$/;"	m	struct:altera_tse_mac
+holdoff_quant	altera_tse.h	/^	u32 holdoff_quant;$/;"	m	struct:altera_tse_mac
+if_in_broadcast_pkts	altera_tse.h	/^	u32 if_in_broadcast_pkts;$/;"	m	struct:altera_tse_mac
+if_in_errors	altera_tse.h	/^	u32 if_in_errors;$/;"	m	struct:altera_tse_mac
+if_in_multicast_pkts	altera_tse.h	/^	u32 if_in_multicast_pkts;$/;"	m	struct:altera_tse_mac
+if_in_ucast_pkts	altera_tse.h	/^	u32 if_in_ucast_pkts;$/;"	m	struct:altera_tse_mac
+if_out_broadcast_pkts	altera_tse.h	/^	u32 if_out_broadcast_pkts;$/;"	m	struct:altera_tse_mac
+if_out_discards	altera_tse.h	/^	u32 if_out_discards;$/;"	m	struct:altera_tse_mac
+if_out_errors	altera_tse.h	/^	u32 if_out_errors;$/;"	m	struct:altera_tse_mac
+if_out_multicast_pkts	altera_tse.h	/^	u32 if_out_multicast_pkts;$/;"	m	struct:altera_tse_mac
+if_out_ucast_pkts	altera_tse.h	/^	u32 if_out_ucast_pkts;$/;"	m	struct:altera_tse_mac
+init_dma	altera_tse.h	/^	int (*init_dma)(struct altera_tse_private *);$/;"	m	struct:altera_dmaops
+init_mac	altera_tse_main.c	/^static int init_mac(struct altera_tse_private *priv)$/;"	f	file:
+init_phy	altera_tse_main.c	/^static int init_phy(struct net_device *dev)$/;"	f	file:
+init_sgmii_pcs	altera_tse_main.c	/^static int init_sgmii_pcs(struct net_device *dev)$/;"	f	file:
+instance_count	altera_tse_main.c	/^static atomic_t instance_count = ATOMIC_INIT(~0);$/;"	v	file:
+len	altera_msgdmahw.h	/^	u32 len;		\/* the number of bytes to transfer$/;"	m	struct:msgdma_extended_desc
+len	altera_tse.h	/^	u32 len;$/;"	m	struct:tse_buffer
+lh	altera_tse.h	/^	struct list_head lh;$/;"	m	struct:tse_buffer	typeref:struct:tse_buffer::list_head
+list_peek_head	altera_sgdma.c	432;"	d	file:
+list_remove_head	altera_sgdma.c	423;"	d	file:
+mac_addr_0	altera_tse.h	/^	u32 mac_addr_0;$/;"	m	struct:altera_tse_mac
+mac_addr_1	altera_tse.h	/^	u32 mac_addr_1;$/;"	m	struct:altera_tse_mac
+mac_cfg_lock	altera_tse.h	/^	spinlock_t mac_cfg_lock;$/;"	m	struct:altera_tse_private
+mac_dev	altera_tse.h	/^	struct altera_tse_mac __iomem *mac_dev;$/;"	m	struct:altera_tse_private	typeref:struct:altera_tse_private::__iomem
+mac_id_1	altera_tse.h	/^	u32 mac_id_1;$/;"	m	struct:altera_tse_mac
+mac_id_2	altera_tse.h	/^	u32 mac_id_2;$/;"	m	struct:altera_tse_mac
+mapped_as_page	altera_tse.h	/^	int mapped_as_page;$/;"	m	struct:tse_buffer
+mdio	altera_tse.h	/^	struct mii_bus *mdio;$/;"	m	struct:altera_tse_private	typeref:struct:altera_tse_private::mii_bus
+mdio_phy0	altera_tse.h	/^	struct altera_tse_mdio mdio_phy0;$/;"	m	struct:altera_tse_mac	typeref:struct:altera_tse_mac::altera_tse_mdio
+mdio_phy0_addr	altera_tse.h	/^	u32 mdio_phy0_addr;$/;"	m	struct:altera_tse_mac
+mdio_phy1	altera_tse.h	/^	struct altera_tse_mdio mdio_phy1;$/;"	m	struct:altera_tse_mac	typeref:struct:altera_tse_mac::altera_tse_mdio
+mdio_phy1_addr	altera_tse.h	/^	u32 mdio_phy1_addr;$/;"	m	struct:altera_tse_mac
+megacore_revision	altera_tse.h	/^	u32 megacore_revision;$/;"	m	struct:altera_tse_mac
+msb_ether_stats_octets	altera_tse.h	/^	u32 msb_ether_stats_octets;$/;"	m	struct:altera_tse_mac
+msb_octets_received_ok	altera_tse.h	/^	u32 msb_octets_received_ok;$/;"	m	struct:altera_tse_mac
+msb_octets_transmitted_ok	altera_tse.h	/^	u32 msb_octets_transmitted_ok;$/;"	m	struct:altera_tse_mac
+msg_enable	altera_tse.h	/^	u32 msg_enable;$/;"	m	struct:altera_tse_private
+msgdma_add_rx_desc	altera_msgdma.c	/^void msgdma_add_rx_desc(struct altera_tse_private *priv,$/;"	f
+msgdma_clear_rxirq	altera_msgdma.c	/^void msgdma_clear_rxirq(struct altera_tse_private *priv)$/;"	f
+msgdma_clear_txirq	altera_msgdma.c	/^void msgdma_clear_txirq(struct altera_tse_private *priv)$/;"	f
+msgdma_csr	altera_msgdmahw.h	/^struct msgdma_csr {$/;"	s
+msgdma_csroffs	altera_msgdmahw.h	139;"	d
+msgdma_descroffs	altera_msgdmahw.h	140;"	d
+msgdma_disable_rxirq	altera_msgdma.c	/^void msgdma_disable_rxirq(struct altera_tse_private *priv)$/;"	f
+msgdma_disable_txirq	altera_msgdma.c	/^void msgdma_disable_txirq(struct altera_tse_private *priv)$/;"	f
+msgdma_enable_rxirq	altera_msgdma.c	/^void msgdma_enable_rxirq(struct altera_tse_private *priv)$/;"	f
+msgdma_enable_txirq	altera_msgdma.c	/^void msgdma_enable_txirq(struct altera_tse_private *priv)$/;"	f
+msgdma_extended_desc	altera_msgdmahw.h	/^struct msgdma_extended_desc {$/;"	s
+msgdma_initialize	altera_msgdma.c	/^int msgdma_initialize(struct altera_tse_private *priv)$/;"	f
+msgdma_reset	altera_msgdma.c	/^void msgdma_reset(struct altera_tse_private *priv)$/;"	f
+msgdma_respoffs	altera_msgdmahw.h	138;"	d
+msgdma_response	altera_msgdmahw.h	/^struct msgdma_response {$/;"	s
+msgdma_rx_status	altera_msgdma.c	/^u32 msgdma_rx_status(struct altera_tse_private *priv)$/;"	f
+msgdma_start_rxdma	altera_msgdma.c	/^void msgdma_start_rxdma(struct altera_tse_private *priv)$/;"	f
+msgdma_tx_buffer	altera_msgdma.c	/^int msgdma_tx_buffer(struct altera_tse_private *priv, struct tse_buffer *buffer)$/;"	f
+msgdma_tx_completions	altera_msgdma.c	/^u32 msgdma_tx_completions(struct altera_tse_private *priv)$/;"	f
+msgdma_uninitialize	altera_msgdma.c	/^void msgdma_uninitialize(struct altera_tse_private *priv)$/;"	f
+napi	altera_tse.h	/^	struct napi_struct napi;$/;"	m	struct:altera_tse_private	typeref:struct:altera_tse_private::napi_struct
+next	altera_sgdmahw.h	/^	u32	next;$/;"	m	struct:sgdma_descrip
+next_descrip	altera_sgdmahw.h	/^	u32	next_descrip;$/;"	m	struct:sgdma_csr
+obj-m	Makefile	/^obj-m := altertse.o$/;"	m
+octets_received_ok	altera_tse.h	/^	u32 octets_received_ok;$/;"	m	struct:altera_tse_mac
+octets_transmitted_ok	altera_tse.h	/^	u32 octets_transmitted_ok;$/;"	m	struct:altera_tse_mac
+oldduplex	altera_tse.h	/^	int oldduplex;$/;"	m	struct:altera_tse_private
+oldlink	altera_tse.h	/^	int oldlink;$/;"	m	struct:altera_tse_private
+oldspeed	altera_tse.h	/^	int oldspeed;$/;"	m	struct:altera_tse_private
+pad	altera_msgdmahw.h	/^	u32 pad[3];		\/* reserved *\/$/;"	m	struct:msgdma_csr
+pad1	altera_sgdmahw.h	/^	u32	pad1;$/;"	m	struct:sgdma_descrip
+pad1	altera_sgdmahw.h	/^	u32	pad1[3];$/;"	m	struct:sgdma_csr
+pad2	altera_sgdmahw.h	/^	u32	pad2;$/;"	m	struct:sgdma_descrip
+pad2	altera_sgdmahw.h	/^	u32	pad2[3];$/;"	m	struct:sgdma_csr
+pad3	altera_sgdmahw.h	/^	u32	pad3;$/;"	m	struct:sgdma_descrip
+pad3	altera_sgdmahw.h	/^	u32	pad3[3];$/;"	m	struct:sgdma_csr
+pause_quanta	altera_tse.h	/^	u32 pause_quanta;$/;"	m	struct:altera_tse_mac
+phy_addr	altera_tse.h	/^	int phy_addr;		\/* PHY's MDIO address, -1 for autodetection *\/$/;"	m	struct:altera_tse_private
+phy_id1	altera_tse.h	/^	u32 phy_id1;	\/* Bits 31:16 of PHY identifier *\/$/;"	m	struct:altera_tse_mdio
+phy_id2	altera_tse.h	/^	u32 phy_id2;	\/* Bits 15:0 of PHY identifier *\/$/;"	m	struct:altera_tse_mdio
+phy_iface	altera_tse.h	/^	phy_interface_t phy_iface;$/;"	m	struct:altera_tse_private
+queue_rx	altera_sgdma.c	/^queue_rx(struct altera_tse_private *priv, struct tse_buffer *buffer)$/;"	f	file:
+queue_rx_peekhead	altera_sgdma.c	/^queue_rx_peekhead(struct altera_tse_private *priv)$/;"	f	file:
+queue_tx	altera_sgdma.c	/^queue_tx(struct altera_tse_private *priv, struct tse_buffer *buffer)$/;"	f	file:
+raddr	altera_sgdmahw.h	/^	u32	raddr; \/* address of data to be read *\/$/;"	m	struct:sgdma_descrip
+rburst	altera_sgdmahw.h	/^	u8	rburst;$/;"	m	struct:sgdma_descrip
+read_addr_hi	altera_msgdmahw.h	/^	u32 read_addr_hi;	\/* data buffer source address high bits *\/$/;"	m	struct:msgdma_extended_desc
+read_addr_lo	altera_msgdmahw.h	/^	u32 read_addr_lo;	\/* data buffer source address low bits *\/$/;"	m	struct:msgdma_extended_desc
+reg10	altera_tse.h	/^	u32 reg10;$/;"	m	struct:altera_tse_mdio
+reg11	altera_tse.h	/^	u32 reg11;$/;"	m	struct:altera_tse_mdio
+reg12	altera_tse.h	/^	u32 reg12;$/;"	m	struct:altera_tse_mdio
+reg13	altera_tse.h	/^	u32 reg13;$/;"	m	struct:altera_tse_mdio
+reg14	altera_tse.h	/^	u32 reg14;$/;"	m	struct:altera_tse_mdio
+reg15	altera_tse.h	/^	u32 reg15;$/;"	m	struct:altera_tse_mdio
+reg16	altera_tse.h	/^	u32 reg16;$/;"	m	struct:altera_tse_mdio
+reg17	altera_tse.h	/^	u32 reg17;$/;"	m	struct:altera_tse_mdio
+reg18	altera_tse.h	/^	u32 reg18;$/;"	m	struct:altera_tse_mdio
+reg19	altera_tse.h	/^	u32 reg19;$/;"	m	struct:altera_tse_mdio
+reg1a	altera_tse.h	/^	u32 reg1a;$/;"	m	struct:altera_tse_mdio
+reg1b	altera_tse.h	/^	u32 reg1b;$/;"	m	struct:altera_tse_mdio
+reg1c	altera_tse.h	/^	u32 reg1c;$/;"	m	struct:altera_tse_mdio
+reg1d	altera_tse.h	/^	u32 reg1d;$/;"	m	struct:altera_tse_mdio
+reg1e	altera_tse.h	/^	u32 reg1e;$/;"	m	struct:altera_tse_mdio
+reg1f	altera_tse.h	/^	u32 reg1f;$/;"	m	struct:altera_tse_mdio
+reg6	altera_tse.h	/^	u32 reg6;$/;"	m	struct:altera_tse_mdio
+reg7	altera_tse.h	/^	u32 reg7;$/;"	m	struct:altera_tse_mdio
+reg8	altera_tse.h	/^	u32 reg8;$/;"	m	struct:altera_tse_mdio
+reg9	altera_tse.h	/^	u32 reg9;$/;"	m	struct:altera_tse_mdio
+rega	altera_tse.h	/^	u32 rega;$/;"	m	struct:altera_tse_mdio
+regb	altera_tse.h	/^	u32 regb;$/;"	m	struct:altera_tse_mdio
+regc	altera_tse.h	/^	u32 regc;$/;"	m	struct:altera_tse_mdio
+regd	altera_tse.h	/^	u32 regd;$/;"	m	struct:altera_tse_mdio
+rege	altera_tse.h	/^	u32 rege;$/;"	m	struct:altera_tse_mdio
+regf	altera_tse.h	/^	u32 regf;$/;"	m	struct:altera_tse_mdio
+remote_partner_base_page_ability	altera_tse.h	/^	u32 remote_partner_base_page_ability;$/;"	m	struct:altera_tse_mdio
+request_and_map	altera_tse_main.c	/^static int request_and_map(struct platform_device *pdev, const char *name,$/;"	f	file:
+reserved1	altera_tse.h	/^	u32 reserved1[5];$/;"	m	struct:altera_tse_mac
+reserved2	altera_tse.h	/^	u32 reserved2;$/;"	m	struct:altera_tse_mac
+reserved3	altera_tse.h	/^	u32 reserved3;$/;"	m	struct:altera_tse_mac
+reserved4	altera_tse.h	/^	u32 reserved4[8];$/;"	m	struct:altera_tse_mac
+reserved5	altera_tse.h	/^	u32 reserved5[42];$/;"	m	struct:altera_tse_mac
+reset_dma	altera_tse.h	/^	void (*reset_dma)(struct altera_tse_private *);$/;"	m	struct:altera_dmaops
+reset_mac	altera_tse_main.c	/^static int reset_mac(struct altera_tse_private *priv)$/;"	f	file:
+resp_fill_level	altera_msgdmahw.h	/^	u32 resp_fill_level;	\/* bit 15:0 *\/$/;"	m	struct:msgdma_csr
+revision	altera_tse.h	/^	u32	revision;$/;"	m	struct:altera_tse_private
+rw_fill_level	altera_msgdmahw.h	/^	u32 rw_fill_level;	\/* bit 31:16 - write fill level$/;"	m	struct:msgdma_csr
+rw_seq_num	altera_msgdmahw.h	/^	u32 rw_seq_num;		\/* bit 31:16 - write sequence number$/;"	m	struct:msgdma_csr
+rx_adjust_fns	altera_tse.h	/^	u32 rx_adjust_fns;$/;"	m	struct:altera_tse_mac
+rx_adjust_ns	altera_tse.h	/^	u32 rx_adjust_ns;$/;"	m	struct:altera_tse_mac
+rx_almost_empty	altera_tse.h	/^	u32 rx_almost_empty;$/;"	m	struct:altera_tse_mac
+rx_almost_full	altera_tse.h	/^	u32 rx_almost_full;$/;"	m	struct:altera_tse_mac
+rx_cmd_stat	altera_tse.h	/^	u32 rx_cmd_stat;$/;"	m	struct:altera_tse_mac
+rx_cons	altera_tse.h	/^	u32 rx_cons;$/;"	m	struct:altera_tse_private
+rx_dma_buf_sz	altera_tse.h	/^	u32 rx_dma_buf_sz;$/;"	m	struct:altera_tse_private
+rx_dma_csr	altera_tse.h	/^	void __iomem *rx_dma_csr;$/;"	m	struct:altera_tse_private
+rx_dma_desc	altera_tse.h	/^	void __iomem *rx_dma_desc;$/;"	m	struct:altera_tse_private
+rx_dma_resp	altera_tse.h	/^	void __iomem *rx_dma_resp;$/;"	m	struct:altera_tse_private
+rx_fifo_depth	altera_tse.h	/^	u32 rx_fifo_depth;$/;"	m	struct:altera_tse_private
+rx_irq	altera_tse.h	/^	u32 rx_irq;$/;"	m	struct:altera_tse_private
+rx_pause_mac_ctrl_frames	altera_tse.h	/^	u32 rx_pause_mac_ctrl_frames;$/;"	m	struct:altera_tse_mac
+rx_period	altera_tse.h	/^	u32 rx_period;$/;"	m	struct:altera_tse_mac
+rx_prod	altera_tse.h	/^	u32 rx_prod;$/;"	m	struct:altera_tse_private
+rx_ring	altera_tse.h	/^	struct tse_buffer *rx_ring;$/;"	m	struct:altera_tse_private	typeref:struct:altera_tse_private::tse_buffer
+rx_ring_size	altera_tse.h	/^	u32 rx_ring_size;$/;"	m	struct:altera_tse_private
+rx_section_empty	altera_tse.h	/^	u32 rx_section_empty;$/;"	m	struct:altera_tse_mac
+rx_section_full	altera_tse.h	/^	u32 rx_section_full;$/;"	m	struct:altera_tse_mac
+rxctrlreg	altera_tse.h	/^	u32 rxctrlreg;$/;"	m	struct:altera_tse_private
+rxdescmem	altera_tse.h	/^	u32 rxdescmem;$/;"	m	struct:altera_tse_private
+rxdescmem_busaddr	altera_tse.h	/^	dma_addr_t rxdescmem_busaddr;$/;"	m	struct:altera_tse_private
+rxdescphys	altera_tse.h	/^	dma_addr_t rxdescphys;$/;"	m	struct:altera_tse_private
+rxdma_irq_lock	altera_tse.h	/^	spinlock_t rxdma_irq_lock;$/;"	m	struct:altera_tse_private
+rxlisthd	altera_tse.h	/^	struct list_head rxlisthd;$/;"	m	struct:altera_tse_private	typeref:struct:altera_tse_private::list_head
+scratch_pad	altera_tse.h	/^	u32 scratch_pad;$/;"	m	struct:altera_tse_mac
+sgdma_add_rx_desc	altera_sgdma.c	/^void sgdma_add_rx_desc(struct altera_tse_private *priv,$/;"	f
+sgdma_async_read	altera_sgdma.c	/^static int sgdma_async_read(struct altera_tse_private *priv)$/;"	f	file:
+sgdma_async_write	altera_sgdma.c	/^static int sgdma_async_write(struct altera_tse_private *priv,$/;"	f	file:
+sgdma_clear_rxirq	altera_sgdma.c	/^void sgdma_clear_rxirq(struct altera_tse_private *priv)$/;"	f
+sgdma_clear_txirq	altera_sgdma.c	/^void sgdma_clear_txirq(struct altera_tse_private *priv)$/;"	f
+sgdma_csr	altera_sgdmahw.h	/^struct sgdma_csr {$/;"	s
+sgdma_csroffs	altera_sgdmahw.h	94;"	d
+sgdma_descrip	altera_sgdmahw.h	/^struct sgdma_descrip {$/;"	s
+sgdma_descroffs	altera_sgdmahw.h	95;"	d
+sgdma_disable_rxirq	altera_sgdma.c	/^void sgdma_disable_rxirq(struct altera_tse_private *priv)$/;"	f
+sgdma_disable_txirq	altera_sgdma.c	/^void sgdma_disable_txirq(struct altera_tse_private *priv)$/;"	f
+sgdma_enable_rxirq	altera_sgdma.c	/^void sgdma_enable_rxirq(struct altera_tse_private *priv)$/;"	f
+sgdma_enable_txirq	altera_sgdma.c	/^void sgdma_enable_txirq(struct altera_tse_private *priv)$/;"	f
+sgdma_initialize	altera_sgdma.c	/^int sgdma_initialize(struct altera_tse_private *priv)$/;"	f
+sgdma_reset	altera_sgdma.c	/^void sgdma_reset(struct altera_tse_private *priv)$/;"	f
+sgdma_rx_status	altera_sgdma.c	/^u32 sgdma_rx_status(struct altera_tse_private *priv)$/;"	f
+sgdma_rxbusy	altera_sgdma.c	/^static int sgdma_rxbusy(struct altera_tse_private *priv)$/;"	f	file:
+sgdma_rxphysaddr	altera_sgdma.c	/^sgdma_rxphysaddr(struct altera_tse_private *priv,$/;"	f	file:
+sgdma_setup_descrip	altera_sgdma.c	/^static void sgdma_setup_descrip(struct sgdma_descrip __iomem *desc,$/;"	f	file:
+sgdma_start_rxdma	altera_sgdma.c	/^void sgdma_start_rxdma(struct altera_tse_private *priv)$/;"	f
+sgdma_tx_buffer	altera_sgdma.c	/^int sgdma_tx_buffer(struct altera_tse_private *priv, struct tse_buffer *buffer)$/;"	f
+sgdma_tx_completions	altera_sgdma.c	/^u32 sgdma_tx_completions(struct altera_tse_private *priv)$/;"	f
+sgdma_txbusy	altera_sgdma.c	/^static int sgdma_txbusy(struct altera_tse_private *priv)$/;"	f	file:
+sgdma_txphysaddr	altera_sgdma.c	/^sgdma_txphysaddr(struct altera_tse_private *priv,$/;"	f	file:
+sgdma_uninitialize	altera_sgdma.c	/^void sgdma_uninitialize(struct altera_tse_private *priv)$/;"	f
+sgmii_pcs_read	altera_tse_main.c	/^static u16 sgmii_pcs_read(struct altera_tse_private *priv, int regnum)$/;"	f	file:
+sgmii_pcs_scratch_test	altera_tse_main.c	/^static int sgmii_pcs_scratch_test(struct altera_tse_private *priv, u16 value)$/;"	f	file:
+sgmii_pcs_write	altera_tse_main.c	/^static void sgmii_pcs_write(struct altera_tse_private *priv, int regnum,$/;"	f	file:
+skb	altera_tse.h	/^	struct sk_buff *skb;$/;"	m	struct:tse_buffer	typeref:struct:tse_buffer::sk_buff
+start_rxdma	altera_tse.h	/^	void (*start_rxdma)(struct altera_tse_private *);$/;"	m	struct:altera_dmaops
+stat_gstrings	altera_tse_ethtool.c	/^static char const stat_gstrings[][ETH_GSTRING_LEN] = {$/;"	v	file:
+status	altera_msgdmahw.h	/^	u32 status;		\/* Read\/Clear *\/$/;"	m	struct:msgdma_csr
+status	altera_msgdmahw.h	/^	u32 status;$/;"	m	struct:msgdma_response
+status	altera_sgdmahw.h	/^	u32	status;$/;"	m	struct:sgdma_csr
+status	altera_sgdmahw.h	/^	u8	status;$/;"	m	struct:sgdma_descrip
+status	altera_tse.h	/^	u32 status;	\/* PHY device operation status register *\/$/;"	m	struct:altera_tse_mdio
+stride	altera_msgdmahw.h	/^	u32 stride;		\/* bit 31:16 write stride$/;"	m	struct:msgdma_extended_desc
+supp_mac_addr_0_0	altera_tse.h	/^	u32 supp_mac_addr_0_0;$/;"	m	struct:altera_tse_mac
+supp_mac_addr_0_1	altera_tse.h	/^	u32 supp_mac_addr_0_1;$/;"	m	struct:altera_tse_mac
+supp_mac_addr_1_0	altera_tse.h	/^	u32 supp_mac_addr_1_0;$/;"	m	struct:altera_tse_mac
+supp_mac_addr_1_1	altera_tse.h	/^	u32 supp_mac_addr_1_1;$/;"	m	struct:altera_tse_mac
+supp_mac_addr_2_0	altera_tse.h	/^	u32 supp_mac_addr_2_0;$/;"	m	struct:altera_tse_mac
+supp_mac_addr_2_1	altera_tse.h	/^	u32 supp_mac_addr_2_1;$/;"	m	struct:altera_tse_mac
+supp_mac_addr_3_0	altera_tse.h	/^	u32 supp_mac_addr_3_0;$/;"	m	struct:altera_tse_mac
+supp_mac_addr_3_1	altera_tse.h	/^	u32 supp_mac_addr_3_1;$/;"	m	struct:altera_tse_mac
+tse_bit_is_clear	altera_utils.c	/^int tse_bit_is_clear(void __iomem *ioaddr, size_t offs, u32 bit_mask)$/;"	f
+tse_bit_is_set	altera_utils.c	/^int tse_bit_is_set(void __iomem *ioaddr, size_t offs, u32 bit_mask)$/;"	f
+tse_buffer	altera_tse.h	/^struct tse_buffer {$/;"	s
+tse_change_mtu	altera_tse_main.c	/^static int tse_change_mtu(struct net_device *dev, int new_mtu)$/;"	f	file:
+tse_clear_bit	altera_utils.c	/^void tse_clear_bit(void __iomem *ioaddr, size_t offs, u32 bit_mask)$/;"	f
+tse_csroffs	altera_tse.h	360;"	d
+tse_ethtool_ops	altera_tse_ethtool.c	/^static const struct ethtool_ops tse_ethtool_ops = {$/;"	v	typeref:struct:ethtool_ops	file:
+tse_fill_stats	altera_tse_ethtool.c	/^static void tse_fill_stats(struct net_device *dev, struct ethtool_stats *dummy,$/;"	f	file:
+tse_free_rx_buffer	altera_tse_main.c	/^static void tse_free_rx_buffer(struct altera_tse_private *priv,$/;"	f	file:
+tse_free_tx_buffer	altera_tse_main.c	/^static void tse_free_tx_buffer(struct altera_tse_private *priv,$/;"	f	file:
+tse_get_drvinfo	altera_tse_ethtool.c	/^static void tse_get_drvinfo(struct net_device *dev,$/;"	f	file:
+tse_get_msglevel	altera_tse_ethtool.c	/^static u32 tse_get_msglevel(struct net_device *dev)$/;"	f	file:
+tse_get_regs	altera_tse_ethtool.c	/^static void tse_get_regs(struct net_device *dev, struct ethtool_regs *regs,$/;"	f	file:
+tse_gstrings	altera_tse_ethtool.c	/^static void tse_gstrings(struct net_device *dev, u32 stringset, u8 *buf)$/;"	f	file:
+tse_init_rx_buffer	altera_tse_main.c	/^static int tse_init_rx_buffer(struct altera_tse_private *priv,$/;"	f	file:
+tse_open	altera_tse_main.c	/^static int tse_open(struct net_device *dev)$/;"	f	file:
+tse_poll	altera_tse_main.c	/^static int tse_poll(struct napi_struct *napi, int budget)$/;"	f	file:
+tse_reglen	altera_tse_ethtool.c	/^static int tse_reglen(struct net_device *dev)$/;"	f	file:
+tse_rx	altera_tse_main.c	/^static int tse_rx(struct altera_tse_private *priv, int limit)$/;"	f	file:
+tse_rx_refill	altera_tse_main.c	/^static inline void tse_rx_refill(struct altera_tse_private *priv)$/;"	f	file:
+tse_rx_vlan	altera_tse_main.c	/^static inline void tse_rx_vlan(struct net_device *dev, struct sk_buff *skb)$/;"	f	file:
+tse_set_bit	altera_utils.c	/^void tse_set_bit(void __iomem *ioaddr, size_t offs, u32 bit_mask)$/;"	f
+tse_set_mac	altera_tse_main.c	/^static void tse_set_mac(struct altera_tse_private *priv, bool enable)$/;"	f	file:
+tse_set_msglevel	altera_tse_ethtool.c	/^static void tse_set_msglevel(struct net_device *dev, uint32_t data)$/;"	f	file:
+tse_set_rx_mode	altera_tse_main.c	/^static void tse_set_rx_mode(struct net_device *dev)$/;"	f	file:
+tse_set_rx_mode_hashfilter	altera_tse_main.c	/^static void tse_set_rx_mode_hashfilter(struct net_device *dev)$/;"	f	file:
+tse_shutdown	altera_tse_main.c	/^static int tse_shutdown(struct net_device *dev)$/;"	f	file:
+tse_sset_count	altera_tse_ethtool.c	/^static int tse_sset_count(struct net_device *dev, int sset)$/;"	f	file:
+tse_start_xmit	altera_tse_main.c	/^static netdev_tx_t tse_start_xmit(struct sk_buff *skb, struct net_device *dev)$/;"	f	file:
+tse_tx_avail	altera_tse_main.c	/^static inline u32 tse_tx_avail(struct altera_tse_private *priv)$/;"	f	file:
+tse_tx_complete	altera_tse_main.c	/^static int tse_tx_complete(struct altera_tse_private *priv)$/;"	f	file:
+tse_update_mac_addr	altera_tse_main.c	/^static void tse_update_mac_addr(struct altera_tse_private *priv, u8 *addr)$/;"	f	file:
+tx_adjust_fns	altera_tse.h	/^	u32 tx_adjust_fns;$/;"	m	struct:altera_tse_mac
+tx_adjust_ns	altera_tse.h	/^	u32 tx_adjust_ns;$/;"	m	struct:altera_tse_mac
+tx_almost_empty	altera_tse.h	/^	u32 tx_almost_empty;$/;"	m	struct:altera_tse_mac
+tx_almost_full	altera_tse.h	/^	u32 tx_almost_full;$/;"	m	struct:altera_tse_mac
+tx_buffer	altera_tse.h	/^	int (*tx_buffer)(struct altera_tse_private *, struct tse_buffer *);$/;"	m	struct:altera_dmaops
+tx_cmd_stat	altera_tse.h	/^	u32 tx_cmd_stat;$/;"	m	struct:altera_tse_mac
+tx_completions	altera_tse.h	/^	u32 (*tx_completions)(struct altera_tse_private *);$/;"	m	struct:altera_dmaops
+tx_cons	altera_tse.h	/^	u32 tx_cons;$/;"	m	struct:altera_tse_private
+tx_dma_csr	altera_tse.h	/^	void __iomem *tx_dma_csr;$/;"	m	struct:altera_tse_private
+tx_dma_desc	altera_tse.h	/^	void __iomem *tx_dma_desc;$/;"	m	struct:altera_tse_private
+tx_fifo_depth	altera_tse.h	/^	u32 tx_fifo_depth;$/;"	m	struct:altera_tse_private
+tx_ipg_length	altera_tse.h	/^	u32 tx_ipg_length;$/;"	m	struct:altera_tse_mac
+tx_irq	altera_tse.h	/^	u32 tx_irq;$/;"	m	struct:altera_tse_private
+tx_lock	altera_tse.h	/^	spinlock_t tx_lock;$/;"	m	struct:altera_tse_private
+tx_pause_mac_ctrl_frames	altera_tse.h	/^	u32 tx_pause_mac_ctrl_frames;$/;"	m	struct:altera_tse_mac
+tx_period	altera_tse.h	/^	u32 tx_period;$/;"	m	struct:altera_tse_mac
+tx_prod	altera_tse.h	/^	u32 tx_prod;$/;"	m	struct:altera_tse_private
+tx_ring	altera_tse.h	/^	struct tse_buffer *tx_ring;$/;"	m	struct:altera_tse_private	typeref:struct:altera_tse_private::tse_buffer
+tx_ring_size	altera_tse.h	/^	u32 tx_ring_size;$/;"	m	struct:altera_tse_private
+tx_section_empty	altera_tse.h	/^	u32 tx_section_empty;$/;"	m	struct:altera_tse_mac
+tx_section_full	altera_tse.h	/^	u32 tx_section_full;$/;"	m	struct:altera_tse_mac
+txctrlreg	altera_tse.h	/^	u32 txctrlreg;$/;"	m	struct:altera_tse_private
+txdescmem	altera_tse.h	/^	u32 txdescmem;$/;"	m	struct:altera_tse_private
+txdescmem_busaddr	altera_tse.h	/^	dma_addr_t txdescmem_busaddr;$/;"	m	struct:altera_tse_private
+txdescphys	altera_tse.h	/^	dma_addr_t txdescphys;$/;"	m	struct:altera_tse_private
+txlisthd	altera_tse.h	/^	struct list_head txlisthd;$/;"	m	struct:altera_tse_private	typeref:struct:altera_tse_private::list_head
+uninit_dma	altera_tse.h	/^	void (*uninit_dma)(struct altera_tse_private *);$/;"	m	struct:altera_dmaops
+waddr	altera_sgdmahw.h	/^	u32	waddr;$/;"	m	struct:sgdma_descrip
+wburst	altera_sgdmahw.h	/^	u8	wburst;$/;"	m	struct:sgdma_descrip
+write_addr_hi	altera_msgdmahw.h	/^	u32 write_addr_hi;	\/* data buffer destination address high bits *\/$/;"	m	struct:msgdma_extended_desc
+write_addr_lo	altera_msgdmahw.h	/^	u32 write_addr_lo;	\/* data buffer destination address low bits *\/$/;"	m	struct:msgdma_extended_desc
