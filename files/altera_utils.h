@@ -4,6 +4,7 @@
  */
 
 #include <linux/kernel.h>
+#include "portage.h"
 
 #ifndef __ALTERA_UTILS_H__
 #define __ALTERA_UTILS_H__

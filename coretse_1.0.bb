@@ -25,6 +25,7 @@ SRC_URI = "file://Makefile \
            file://vsc8575_phy.c            \
            file://cpu_types.h              \
            file://phy.h                    \
+           file://portage.h                \
            file://MIT                      \
           "
 

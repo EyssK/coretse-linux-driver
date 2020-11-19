@@ -1214,10 +1214,57 @@ TSE_cfg_struct_def_init
     }
 }
 
+static void
+mac_reset
+(
+    struct altera_tse_private * priv
+)
+{
+    struct tmp {
+        struct altera_tse_mac __iomem *base_addr;
+    } _tmp = {priv->mac_dev}, *this_tse = &_tmp;
+
+    /* Reset MCXMAC TX functionality */
+    HAL_set_32bit_reg_field(this_tse->base_addr, CFG1_TX_RST, 0x01u);
+
+    /* Reset MCXMAC RX functionality */
+    HAL_set_32bit_reg_field(this_tse->base_addr, CFG1_RX_RST, 0x01u);
+
+    /* Reset MCXMAC TX control */
+    HAL_set_32bit_reg_field(this_tse->base_addr, CFG1_TXCTL_RST, 0x01u);
+
+    /* Reset MCXMAC RX control */
+    HAL_set_32bit_reg_field(this_tse->base_addr, CFG1_RXCTL_RST, 0x01u);
+
+    /* Reset MIIMGMT  */
+    HAL_set_32bit_reg_field(this_tse->base_addr, MIIMGMT_RESET_MII_MGMT, 0x01u);
+
+    /* Reset MIIMGMT  */
+    HAL_set_32bit_reg_field(this_tse->base_addr, IFC_RESET, 0x01u);
+
+    /* Reset FIFO watermark module */
+    HAL_set_32bit_reg_field(this_tse->base_addr, FIFOCFG0_WMM_RST, 0x01u);
+
+    /* Reset FIFO Rx system module */
+    HAL_set_32bit_reg_field(this_tse->base_addr, FIFOCFG0_RSYS_RST, 0x01u);
+
+    /* Reset FIFO Rx fab module */
+    HAL_set_32bit_reg_field(this_tse->base_addr, FIFOCFG0_RFAB_RST, 0x01u);
+
+    /* Reset FIFO Tx system module */
+    HAL_set_32bit_reg_field(this_tse->base_addr, FIFOCFG0_TSYS_RST, 0x01u);
+
+    /* Reset FIFO Tx system module */
+    HAL_set_32bit_reg_field(this_tse->base_addr, FIFOCFG0_TFAB_RST, 0x01u);
+}
+
+
 static void config_mac_hw(struct altera_tse_private * priv, const tse_cfg_t * cfg)
 {
-	// TODO
-#if 0
+    struct tmp {
+        struct altera_tse_mac __iomem *base_addr;
+    } _tmp = {priv->mac_dev}, *this_tse = &_tmp;
+
     uint32_t tempreg;
 
     /* Check for validity of configuration parameters */
@@ -1429,12 +1476,14 @@ static void config_mac_hw(struct altera_tse_private * priv, const tse_cfg_t * cf
     {
         HAL_set_32bit_reg_field(this_tse->base_addr, FIFOCFG5_HSTDRPLT64, 0x01);
     }
-#endif
 }
 
 static void update_mac_cfg(struct altera_tse_private * priv, u8 phy_addr)
 {
-	struct coretse_mac *mac = (struct coretse_mac *)(priv->mac_dev);
+    struct tmp {
+        struct altera_tse_mac __iomem *base_addr;
+    } _tmp = {priv->mac_dev}, *this_tse = &_tmp;
+
     tse_speed_t speed;
     u8 fullduplex;
     u8 link_up;
@@ -1460,56 +1509,45 @@ static void update_mac_cfg(struct altera_tse_private * priv, u8 phy_addr)
 #endif
 
         /* Set byte/nibble mode based on interface type and link speed. */
-        //HAL_set_32bit_reg_field(this_tse->base_addr, CFG2_IF_MODE, 0x00u);
-		tse_clear_bit(mac, tse_csroffs2(cfg2) , CFG2_IF_MODE_MASK);
+        HAL_set_32bit_reg_field(this_tse->base_addr, CFG2_IF_MODE, 0x00u);
 
         if(TSE_MAC1000MBPS == speed)
         {
             /* Set interface to byte mode. */
-            //HAL_set_32bit_reg_field(this_tse->base_addr, CFG2_IF_MODE, 0x02);
-			tse_set_bit(mac, tse_csroffs2(cfg2) , 2 << CFG2_IF_MODE_SHIFT);
+            HAL_set_32bit_reg_field(this_tse->base_addr, CFG2_IF_MODE, 0x02);
 
             /* RB */
-            //HAL_set_32bit_reg(this_tse->base_addr, MISCC, SPEED_1000M);
-			csrwr32(SPEED_1000M, mac, tse_csroffs2(misc));
-            //HAL_set_32bit_reg_field(this_tse->base_addr, FIFOCFG5_CFGBYTEMODE, 0x01);
-			tse_set_bit(mac, tse_csroffs2(fifo_cfg5) , 1 << FIFOCFG5_CFGBYTEMODE_SHIFT);
+            HAL_set_32bit_reg(this_tse->base_addr, MISCC, SPEED_1000M);
+            HAL_set_32bit_reg_field(this_tse->base_addr, FIFOCFG5_CFGBYTEMODE, 0x01);
         }
         else
         {
             /* Set interface to nibble mode. */
-            //HAL_set_32bit_reg_field(this_tse->base_addr, CFG2_IF_MODE, 0x00u);
-            tse_clear_bit(mac, tse_csroffs2(cfg2) , CFG2_IF_MODE_MASK);
+            HAL_set_32bit_reg_field(this_tse->base_addr, CFG2_IF_MODE, 0x00u);
 
             if(TSE_MAC100MBPS == speed)
             {
-                //HAL_set_32bit_reg(this_tse->base_addr, MISCC, SPEED_100M);
-				csrwr32(SPEED_100M, mac, tse_csroffs2(misc));
-                //HAL_set_32bit_reg_field(this_tse->base_addr, CFG2_IF_MODE, 0x01);
-				tse_set_bit(mac, tse_csroffs2(cfg2), 1 << CFG2_IF_MODE_SHIFT);
+                HAL_set_32bit_reg(this_tse->base_addr, MISCC, SPEED_100M);
+                HAL_set_32bit_reg_field(this_tse->base_addr, CFG2_IF_MODE, 0x01);
             }
             else
             {
-                //HAL_set_32bit_reg(this_tse->base_addr, MISCC, SPEED_10M);
-				csrwr32(SPEED_10M, mac, tse_csroffs2(misc));
+                HAL_set_32bit_reg(this_tse->base_addr, MISCC, SPEED_10M);
             }
 
-            // HAL_set_32bit_reg_field(this_tse->base_addr, FIFOCFG5_CFGBYTEMODE, 0x00);
-			tse_clear_bit(mac, tse_csroffs2(fifo_cfg5),  FIFOCFG5_CFGBYTEMODE_MASK);
+            HAL_set_32bit_reg_field(this_tse->base_addr, FIFOCFG5_CFGBYTEMODE, 0x00);
         }
 
         /* Configure duplex mode */
         if(TSE_HALF_DUPLEX == fullduplex)
         {
             /* half duplex */
-            //HAL_set_32bit_reg_field(this_tse->base_addr, CFG2_FDX, 0x0);
-			tse_clear_bit(mac, tse_csroffs2(cfg2), CFG2_FDX_MASK);
+            HAL_set_32bit_reg_field(this_tse->base_addr, CFG2_FDX, 0x0);
         }
         else
         {
             /* full duplex */
-            //HAL_set_32bit_reg_field(this_tse->base_addr, CFG2_FDX, 0x01);
-			tse_set_bit(mac, tse_csroffs2(cfg2), 1 << CFG2_FDX_SHIFT);
+            HAL_set_32bit_reg_field(this_tse->base_addr, CFG2_FDX, 0x01);
         }
     }
 }
@@ -1522,21 +1560,17 @@ TSE_init
 )
 {
 	struct coretse_mac *mac = (struct coretse_mac *)(priv->mac_dev);
-	
-    //HAL_set_32bit_reg_field(base_addr, CFG2_IF_MODE, 0x00u);
-	tse_clear_bit(mac, tse_csroffs2(cfg2) , CFG2_IF_MODE_MASK);
-	
+    void __iomem *base_addr = mac;
+
+    HAL_set_32bit_reg_field(base_addr, CFG2_IF_MODE, 0x00u);
+
     if(cfg != 0)
     {
-        //HAL_set_32bit_reg(base_addr, DMAINTRMASK, 0x00000000UL);
-		tse_clear_bit(mac, tse_csroffs2(dma_intr_mask) , 0xFFFFFFFF);
+        HAL_set_32bit_reg(base_addr, DMAINTRMASK, 0x00000000UL);
 
-        //this_tse->base_addr = base_addr;
-		// TODO
-        //mac_reset(this_tse);
+        mac_reset(priv);
 
-        //HAL_set_32bit_reg_field(base_addr, CFG2_IF_MODE, 0x00u);
-		tse_clear_bit(mac, tse_csroffs2(cfg2) , CFG2_IF_MODE_MASK);
+        HAL_set_32bit_reg_field(base_addr, CFG2_IF_MODE, 0x00u);
 
         config_mac_hw(priv, cfg);
 
@@ -1623,26 +1657,20 @@ TSE_init
         update_mac_cfg(priv, priv->phy_addr);
 
         /*Enable Stats module*/
-        //HAL_set_32bit_reg_field(base_addr, IFC_STATS_EN, 0x01u);
-		tse_set_bit(mac, tse_csroffs2(interface_control), 1 << IFC_STATS_EN_SHIFT);
+        HAL_set_32bit_reg_field(base_addr, IFC_STATS_EN, 0x01u);
 
         /*Need to write 1 and then 0 to correctly clear and start all counters*/
-        //HAL_set_32bit_reg_field(base_addr, IFC_STATS_CLR_ALL, 0x01u);
-		tse_set_bit(mac, tse_csroffs2(interface_control), 1 << IFC_STATS_CLR_ALL_SHIFT);
-        //HAL_set_32bit_reg_field(base_addr, IFC_STATS_CLR_ALL, 0x00u);
-		tse_clear_bit(mac, tse_csroffs2(interface_control), IFC_STATS_CLR_ALL_MASK);
+        HAL_set_32bit_reg_field(base_addr, IFC_STATS_CLR_ALL, 0x01u);
+        HAL_set_32bit_reg_field(base_addr, IFC_STATS_CLR_ALL, 0x00u);
 
         /* Enable default Flow Control at MAC level.    */
-        //HAL_set_32bit_reg(base_addr, FPC, cfg->framefilter);
-		csrwr32(cfg->framefilter, mac, tse_csroffs2(hash_filter));
+        HAL_set_32bit_reg(base_addr, FPC, cfg->framefilter);
 
         /* Enable transmission at MAC level. */
-        //HAL_set_32bit_reg_field(base_addr, CFG1_TX_EN, 0x01u);
-		tse_set_bit(mac, tse_csroffs2(cfg1), 1 << CFG1_TX_EN_SHIFT);
+        HAL_set_32bit_reg_field(base_addr, CFG1_TX_EN, 0x01u);
 
         /* Enable reception at MAC level.    */
-        //HAL_set_32bit_reg_field(base_addr, CFG1_RX_EN, 0x01u);
-		tse_set_bit(mac, tse_csroffs2(cfg1), 1 << CFG1_RX_EN_SHIFT);
+        HAL_set_32bit_reg_field(base_addr, CFG1_RX_EN, 0x01u);
     }
 }
 
