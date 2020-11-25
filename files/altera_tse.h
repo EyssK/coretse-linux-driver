@@ -607,6 +607,9 @@ struct altera_tse_private {
 	u32 hash_filter;
 	u32 added_unicast;
 
+    /* Descriptor memory info for managing coretsedma */
+    void *coretse_dma_instance;
+    
 	/* Descriptor memory info for managing SGDMA */
 	u32 txdescmem;
 	u32 rxdescmem;

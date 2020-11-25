@@ -43,10 +43,13 @@
 #include "altera_msgdma.h"
 
 #include "core_tse.h"
+#include "coretse_dma.h"
+
+#define DEBUG
 
 static atomic_t instance_count = ATOMIC_INIT(~0);
 /* Module parameters */
-static int debug = -1;
+int debug = -1;
 module_param(debug, int, 0644);
 MODULE_PARM_DESC(debug, "Message Level (-1: default, 0: no output, 16: all)");
 
@@ -55,12 +58,12 @@ static const u32 default_msg_level = (NETIF_MSG_DRV | NETIF_MSG_PROBE |
 					NETIF_MSG_IFDOWN);
 
 #define RX_DESCRIPTORS 64
-static int dma_rx_num = RX_DESCRIPTORS;
+int dma_rx_num = RX_DESCRIPTORS;
 module_param(dma_rx_num, int, 0644);
 MODULE_PARM_DESC(dma_rx_num, "Number of descriptors in the RX list");
 
 #define TX_DESCRIPTORS 64
-static int dma_tx_num = TX_DESCRIPTORS;
+int dma_tx_num = TX_DESCRIPTORS;
 module_param(dma_tx_num, int, 0644);
 MODULE_PARM_DESC(dma_tx_num, "Number of descriptors in the TX list");
 
@@ -377,6 +380,8 @@ static int tse_rx(struct altera_tse_private *priv, int limit)
 	u16 pktlength;
 	u16 pktstatus;
 
+    dev_dbg(priv->device, "%s\n",__func__);
+    
 	/* Check for count < limit first as get_rx_status is changing
 	* the response-fifo so we must process the next packet
 	* after calling get_rx_status if a response is pending.
@@ -451,6 +456,8 @@ static int tse_tx_complete(struct altera_tse_private *priv)
 	struct tse_buffer *tx_buff;
 	int txcomplete = 0;
 
+    dev_dbg(priv->device, "%s\n",__func__);
+    
 	spin_lock(&priv->tx_lock);
 
 	ready = priv->dmaops->tx_completions(priv);
@@ -498,6 +505,8 @@ static int tse_poll(struct napi_struct *napi, int budget)
 	int rxcomplete = 0;
 	unsigned long int flags;
 	
+    netdev_dbg(priv->dev, "%s\n", __func__);
+    
 	/* TODO */
 	return 0;
 
@@ -528,6 +537,8 @@ static irqreturn_t altera_isr(int irq, void *dev_id)
 	struct net_device *dev = dev_id;
 	struct altera_tse_private *priv;
 
+    netdev_dbg(priv->dev, "%s\n", __func__);
+    
 	if (unlikely(!dev)) {
 		pr_err("%s: invalid dev pointer\n", __func__);
 		return IRQ_NONE;
@@ -570,10 +581,8 @@ static netdev_tx_t tse_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	netdev_tx_t ret = NETDEV_TX_OK;
 	dma_addr_t dma_addr;
 
-	/* TODO */
-	return 0;
-	
-	
+    netdev_dbg(priv->dev, "%s\n", __func__);
+    
 	spin_lock_bh(&priv->tx_lock);
 
 	if (unlikely(tse_tx_avail(priv) < nfrags + 1)) {
@@ -775,7 +784,7 @@ static int altera_tse_phy_get_addr_mdio_create(struct net_device *dev)
 
 /* Initialize driver's PHY state, and attach to the PHY
  */
-static int init_phy(struct net_device *dev)
+int init_phy(struct net_device *dev)
 {
 	struct altera_tse_private *priv = netdev_priv(dev);
 	struct phy_device *phydev;
@@ -783,9 +792,13 @@ static int init_phy(struct net_device *dev)
 	bool fixed_link = false;
 	int rc = 0;
 
+    netdev_dbg(dev, "init_phy\n");
+    
 	/* Avoid init phy in case of no phy present */
-	if (!priv->phy_iface)
+	if (!priv->phy_iface){
+        netdev_info(dev, "no phy present\n");
 		return 0;
+    }
 
 	priv->oldlink = 0;
 	priv->oldspeed = 0;
@@ -1214,6 +1227,7 @@ TSE_cfg_struct_def_init
     }
 }
 
+
 static void
 mac_reset
 (
@@ -1268,29 +1282,29 @@ static void config_mac_hw(struct altera_tse_private * priv, const tse_cfg_t * cf
     uint32_t tempreg;
 
     /* Check for validity of configuration parameters */
-    HAL_ASSERT(IS_STATE(cfg->tx_edc_enable));
-    HAL_ASSERT(IS_STATE(cfg->rx_edc_enable));
-    HAL_ASSERT(TSE_PREAMLEN_MAXVAL >= cfg->preamble_length);
-    HAL_ASSERT(IS_STATE(cfg->hugeframe_enable));
-    HAL_ASSERT(IS_STATE(cfg->length_field_check));
-    HAL_ASSERT(IS_STATE(cfg->pad_n_CRC));
-    HAL_ASSERT(IS_STATE(cfg->append_CRC));
-    HAL_ASSERT(IS_STATE(cfg->loopback));
-    HAL_ASSERT(IS_STATE(cfg->rx_flow_ctrl));
-    HAL_ASSERT(IS_STATE(cfg->tx_flow_ctrl));
-
-    HAL_ASSERT(TSE_BTBIFG_MAXVAL >= cfg->btb_IFG);
-    HAL_ASSERT(TSE_MAXRETX_MAXVAL >= cfg->max_retx_tries);
-    HAL_ASSERT(IS_STATE(cfg->excessive_defer));
-    HAL_ASSERT(IS_STATE(cfg->nobackoff));
-    HAL_ASSERT(IS_STATE(cfg->backpres_nobackoff));
-    HAL_ASSERT(IS_STATE(cfg->ABEB_enable));
-    HAL_ASSERT(TSE_ABEBTRUNC_MAXVAL >= cfg->ABEB_truncvalue);
-    HAL_ASSERT(TSE_BY28_PHY_CLK >= cfg->phyclk);
-    HAL_ASSERT(IS_STATE(cfg->supress_preamble));
-    HAL_ASSERT(IS_STATE(cfg->autoscan_phys));
-    HAL_ASSERT(TSE_MAXFRAMELEN_MAXVAL >= cfg->max_frame_length);
-    HAL_ASSERT(TSE_SLOTTIME_MAXVAL >= cfg->slottime);
+//     HAL_ASSERT(IS_STATE(cfg->tx_edc_enable));
+//     HAL_ASSERT(IS_STATE(cfg->rx_edc_enable));
+//     HAL_ASSERT(TSE_PREAMLEN_MAXVAL >= cfg->preamble_length);
+//     HAL_ASSERT(IS_STATE(cfg->hugeframe_enable));
+//     HAL_ASSERT(IS_STATE(cfg->length_field_check));
+//     HAL_ASSERT(IS_STATE(cfg->pad_n_CRC));
+//     HAL_ASSERT(IS_STATE(cfg->append_CRC));
+//     HAL_ASSERT(IS_STATE(cfg->loopback));
+//     HAL_ASSERT(IS_STATE(cfg->rx_flow_ctrl));
+//     HAL_ASSERT(IS_STATE(cfg->tx_flow_ctrl));
+// 
+//     HAL_ASSERT(TSE_BTBIFG_MAXVAL >= cfg->btb_IFG);
+//     HAL_ASSERT(TSE_MAXRETX_MAXVAL >= cfg->max_retx_tries);
+//     HAL_ASSERT(IS_STATE(cfg->excessive_defer));
+//     HAL_ASSERT(IS_STATE(cfg->nobackoff));
+//     HAL_ASSERT(IS_STATE(cfg->backpres_nobackoff));
+//     HAL_ASSERT(IS_STATE(cfg->ABEB_enable));
+//     HAL_ASSERT(TSE_ABEBTRUNC_MAXVAL >= cfg->ABEB_truncvalue);
+//     HAL_ASSERT(TSE_BY28_PHY_CLK >= cfg->phyclk);
+//     HAL_ASSERT(IS_STATE(cfg->supress_preamble));
+//     HAL_ASSERT(IS_STATE(cfg->autoscan_phys));
+//     HAL_ASSERT(TSE_MAXFRAMELEN_MAXVAL >= cfg->max_frame_length);
+//     HAL_ASSERT(TSE_SLOTTIME_MAXVAL >= cfg->slottime);
 
     /* Configure PHY related MII MGMT registers */
     tempreg = (uint32_t)cfg->phyclk & MII_CLOCK_SELECT_MASK;
@@ -1578,25 +1592,10 @@ TSE_init
 		// TODO
         // assign_station_addr(this_tse, cfg->mac_addr);
 
-        /* Intialize Tx & Rx descriptor rings */
-		// TODO
-        // tx_desc_ring_init(this_tse);
-        // rx_desc_ring_init(this_tse);
-
-        /* Initialize Tx descriptors related variables. */
-        // TODO
-		// this_tse->first_tx_index = INVALID_INDEX;
-        // this_tse->last_tx_index = INVALID_INDEX;
-        // this_tse->next_tx_index = 0;
-        // this_tse->nb_available_tx_desc = TSE_TX_RING_SIZE;
-
-        /* Initialize Rx descriptors related variables. */
-		// TODO
-        // this_tse->nb_available_rx_desc = TSE_RX_RING_SIZE;
-        // this_tse->next_free_rx_desc_index = 0;
-        // this_tse->first_rx_desc_index = INVALID_INDEX;
-
-        /* initialize default interrupt handlers */
+        // init descriptors
+        // coretse_dma_init(priv);
+        
+         /* initialize default interrupt handlers */
         // TODO
         // this_tse->tx_complete_handler = NULL_POINTER;
         // this_tse->pckt_rx_callback = NULL_POINTER;
@@ -1674,9 +1673,8 @@ TSE_init
     }
 }
 
-void coretse_open(struct net_device *dev) {
-	struct altera_tse_private *priv = netdev_priv(dev);
-	static tse_cfg_t g_tse_config_0;
+static int coretse_open(struct altera_tse_private *priv) 
+{
 	static tse_cfg_t g_tse_config_1;
 	static u8 mac_address_1[6] = {0xB1, 0xB2, 0xB3, 0xB4, 0xB5, 0xB6};
 	
@@ -1687,6 +1685,7 @@ void coretse_open(struct net_device *dev) {
     g_tse_config_1.speed_duplex_select = TSE_ANEG_1000M_FD;
     g_tse_config_1.pad_n_CRC = 0;
     g_tse_config_1.append_CRC = 0;
+    g_tse_config_1.loopback = 1;
     g_tse_config_1.mac_addr[0] = mac_address_1[0];
     g_tse_config_1.mac_addr[1] = mac_address_1[1];
     g_tse_config_1.mac_addr[2] = mac_address_1[2];
@@ -1695,7 +1694,8 @@ void coretse_open(struct net_device *dev) {
     g_tse_config_1.mac_addr[5] = mac_address_1[5];
     g_tse_config_1.framefilter = TSE_FC_DEFAULT_MASK;//TSE_FC_PROMISCOUS_MODE_MASK
     
-    TSE_init(priv, &g_tse_config_0);
+    TSE_init(priv, &g_tse_config_1);
+    return 0;
 }
     
     
@@ -1707,9 +1707,6 @@ static int tse_open(struct net_device *dev)
 	int ret = 0;
 	int i;
 	unsigned long int flags;
-	
-	/* TODO */
-	return 0;
 
 	/* Reset and configure TSE MAC and probe associated PHY */
 	ret = priv->dmaops->init_dma(priv);
@@ -1735,15 +1732,17 @@ static int tse_open(struct net_device *dev)
 		goto phy_error;
 	}
 
-	ret = reset_mac(priv);
-	/* Note that reset_mac will fail if the clocks are gated by the PHY
-	 * due to the PHY being put into isolation or power down mode.
-	 * This is not an error if reset fails due to no clock.
-	 */
-	if (ret)
-		netdev_dbg(dev, "Cannot reset MAC core (error: %d)\n", ret);
+	// TODO
+// 	ret = reset_mac(priv);
+// 	/* Note that reset_mac will fail if the clocks are gated by the PHY
+// 	 * due to the PHY being put into isolation or power down mode.
+// 	 * This is not an error if reset fails due to no clock.
+// 	 */
+// 	if (ret)
+// 		netdev_dbg(dev, "Cannot reset MAC core (error: %d)\n", ret);
 
-	ret = init_mac(priv);
+    // ret = init_mac(priv);
+    ret = coretse_open(priv);
 	spin_unlock(&priv->mac_cfg_lock);
 	if (ret) {
 		netdev_err(dev, "Cannot init MAC core (error: %d)\n", ret);
@@ -1761,24 +1760,25 @@ static int tse_open(struct net_device *dev)
 		goto alloc_skbuf_error;
 	}
 
-
 	/* Register RX interrupt */
 	ret = request_irq(priv->rx_irq, altera_isr, IRQF_SHARED,
 			  dev->name, dev);
 	if (ret) {
-		netdev_err(dev, "Unable to register RX interrupt %d\n",
-			   priv->rx_irq);
+		netdev_err(dev, "Unable to register RX interrupt %d: %d for dev %p\n",
+			   priv->rx_irq, ret, dev);
 		goto init_error;
 	}
 
+
 	/* Register TX interrupt */
-	ret = request_irq(priv->tx_irq, altera_isr, IRQF_SHARED,
-			  dev->name, dev);
-	if (ret) {
-		netdev_err(dev, "Unable to register TX interrupt %d\n",
-			   priv->tx_irq);
-		goto tx_request_irq_error;
-	}
+    // Only ONE IRQ with coretse mac
+// 	ret = request_irq(priv->tx_irq, altera_isr, IRQF_SHARED,
+// 			  dev->name, dev);
+// 	if (ret) {
+// 		netdev_err(dev, "Unable to register TX interrupt %d\n",
+// 			   priv->tx_irq);
+// 		goto tx_request_irq_error;
+// 	}
 
 	/* Enable DMA interrupts */
 	spin_lock_irqsave(&priv->rxdma_irq_lock, flags);
@@ -1822,13 +1822,13 @@ static int tse_shutdown(struct net_device *dev)
 	struct altera_tse_private *priv = netdev_priv(dev);
 	int ret;
 	unsigned long int flags;
-
-	/* TODO */
-	return 0;
-	
+    
 	/* Stop the PHY */
-	if (dev->phydev)
-		phy_stop(dev->phydev);
+	if (dev->phydev){
+        phy_stop(dev->phydev);
+        if (of_phy_is_fixed_link(priv->device->of_node))
+            of_phy_deregister_fixed_link(priv->device->of_node);
+    }
 
 	netif_stop_queue(dev);
 	napi_disable(&priv->napi);
@@ -1841,19 +1841,20 @@ static int tse_shutdown(struct net_device *dev)
 
 	/* Free the IRQ lines */
 	free_irq(priv->rx_irq, dev);
-	free_irq(priv->tx_irq, dev);
+// 	free_irq(priv->tx_irq, dev);
 
 	/* disable and reset the MAC, empties fifo */
 	spin_lock(&priv->mac_cfg_lock);
 	spin_lock(&priv->tx_lock);
 
-	ret = reset_mac(priv);
+    // TODO
+// 	ret = reset_mac(priv);
 	/* Note that reset_mac will fail if the clocks are gated by the PHY
 	 * due to the PHY being put into isolation or power down mode.
 	 * This is not an error if reset fails due to no clock.
 	 */
-	if (ret)
-		netdev_dbg(dev, "Cannot reset MAC core (error: %d)\n", ret);
+// 	if (ret)
+// 		netdev_dbg(dev, "Cannot reset MAC core (error: %d)\n", ret);
 	priv->dmaops->reset_dma(priv);
 	free_skbufs(dev);
 
@@ -1904,7 +1905,7 @@ static int request_and_map(struct platform_device *pdev, const char *name,
 	return 0;
 }
 
-#include "core_tse.h"
+// #include "core_tse.h"
 static void key_test(struct platform_device *pdev) {
     //struct resource *region = pdev->resource;
     //struct device *device = &pdev->dev;
@@ -1953,6 +1954,13 @@ static void key_test(struct platform_device *pdev) {
 	*/
 }
 
+// void phy_stub(struct net_device *ndev){
+//     struct phy_device phydev;
+//     int phy_connect_direct(ndev, &phydev,
+//                            void (*handler)(struct net_device *),
+//                            phy_interface_t interface)
+// }
+
 /* Probe Altera TSE MAC device
  */
 static int coretse_probe(struct platform_device *pdev)
@@ -1960,10 +1968,10 @@ static int coretse_probe(struct platform_device *pdev)
 	struct net_device *ndev;
 	int ret = -ENODEV;
 	struct resource *control_port;
-	//struct resource *dma_res;
+	struct resource *dma_res;
 	struct altera_tse_private *priv;
 	const unsigned char *macaddr;
-	//void __iomem *descmap;
+	void __iomem *descmap;
 	const struct of_device_id *of_id = NULL;
 
     dev_info(&pdev->dev,"Coretse probing starts\n");
@@ -1991,26 +1999,27 @@ static int coretse_probe(struct platform_device *pdev)
 	if (priv->dmaops &&
 	    priv->dmaops->coretse_dtype == CORETSE_DMA) {
 		
-		dev_info(&pdev->dev,"CORETSE_DMA\n");
-		/* TODO handles DMA buffers */
+		/* TODO handles DMA buffers in device tree
+         * hard coded for now
+         */
 		/* Get the mapped address to the SGDMA descriptor memory */
-//		ret = request_and_map(pdev, "memory.", &dma_res, &descmap);
-//		if (ret)
-//			goto err_free_netdev;
-//
-//		/* Start of that memory is for transmit descriptors */
-//		priv->tx_dma_desc = descmap;
-//
-//		/* First half is for tx descriptors, other half for tx */
-//		priv->txdescmem = resource_size(dma_res)/2;
-//
-//		priv->txdescmem_busaddr = (dma_addr_t)dma_res->start;
-//
-//		priv->rx_dma_desc = (void __iomem *)((uintptr_t)(descmap +
-//						     priv->txdescmem));
-//		priv->rxdescmem = resource_size(dma_res)/2;
-//		priv->rxdescmem_busaddr = dma_res->start;
-//		priv->rxdescmem_busaddr += priv->txdescmem;
+// 		ret = request_and_map(pdev, "s1", &dma_res, &descmap);
+// 		if (ret)
+// 			goto err_free_netdev;
+// 
+// 		/* Start of that memory is for transmit descriptors */
+// 		priv->tx_dma_desc = descmap;
+// 
+// 		/* First half is for tx descriptors, other half for tx */
+        priv->txdescmem = 0x4000;
+// 
+// 		priv->txdescmem_busaddr = (dma_addr_t)dma_res->start;
+// 
+// 		priv->rx_dma_desc = (void __iomem *)((uintptr_t)(descmap +
+// 						     priv->txdescmem));
+        priv->rxdescmem = 0x4000;
+// 		priv->rxdescmem_busaddr = dma_res->start;
+// 		priv->rxdescmem_busaddr += priv->txdescmem;
 
         /* TODO only for 32bit ??
 		if (upper_32_bits(priv->rxdescmem_busaddr)) {
@@ -2071,10 +2080,12 @@ static int coretse_probe(struct platform_device *pdev)
 
 	/* MAC address space */
 	control_port = pdev->resource;
+
 	priv->mac_dev = (struct altera_tse_mac*)devm_ioremap(&pdev->dev, control_port->start, resource_size(control_port));
 	/*ret = request_and_map(pdev, "control_port", &control_port,
 			      (void __iomem **)&priv->mac_dev);
 			      */
+    dev_info(&pdev->dev,"control port start 0x%x size 0x%x priv->mac_dev %p\n",control_port->start,resource_size(control_port), priv->mac_dev);
 	if (!priv->mac_dev) {
 		dev_err(&pdev->dev,"Cannot map MAC address space\n");
 		goto err_free_netdev;
@@ -2097,24 +2108,26 @@ static int coretse_probe(struct platform_device *pdev)
 
 
 	/* Rx IRQ */
-	/*
+    // TODO handle in device tree
 	priv->rx_irq = platform_get_irq_byname(pdev, "rx_irq");
 	if (priv->rx_irq == -ENXIO) {
 		dev_err(&pdev->dev, "cannot obtain Rx IRQ\n");
 		ret = -ENXIO;
 		goto err_free_netdev;
 	}
-	*/
+// 	priv->rx_irq = 31; /*FABRIC_F2H_0_PLIC*/
+
 
 	/* Tx IRQ */
-	/*
+    // TODO handle in device tree
 	priv->tx_irq = platform_get_irq_byname(pdev, "tx_irq");
 	if (priv->tx_irq == -ENXIO) {
 		dev_err(&pdev->dev, "cannot obtain Tx IRQ\n");
 		ret = -ENXIO;
 		goto err_free_netdev;
 	}
-	*/
+// 	priv->tx_irq = 31; /*FABRIC_F2H_0_PLIC*/
+
 
 	/* get FIFO depths from device tree */
 	/*
@@ -2173,21 +2186,23 @@ static int coretse_probe(struct platform_device *pdev)
 	priv->rx_dma_buf_sz = ALTERA_RXDMABUFFER_SIZE;
 
 	/* get default MAC address from device tree */
-	dev_info(&pdev->dev, "Get MAC address\n");
 	macaddr = of_get_mac_address(pdev->dev.of_node);
-	if (!IS_ERR(macaddr))
-		ether_addr_copy(ndev->dev_addr, macaddr);
-	else
-		eth_hw_addr_random(ndev);
+	if (!IS_ERR(macaddr)) {
+        dev_dbg(&pdev->dev, "MAC found in DT\n");
+        ether_addr_copy(ndev->dev_addr, macaddr);
+    }
+	else {
+        dev_dbg(&pdev->dev, "No MAC found in DT\n");
+        eth_hw_addr_random(ndev);
+    }
 
 	/* get phy addr and create mdio */
-	//ret = altera_tse_phy_get_addr_mdio_create(ndev);
+	ret = altera_tse_phy_get_addr_mdio_create(ndev);
 
-	//if (ret)
-	//	goto err_free_netdev;
+	if (ret)
+		goto err_free_netdev;
 
 	/* initialize netdev */
-	dev_info(&pdev->dev, "initialize netdev\n");
 	ndev->mem_start = control_port->start;
 	ndev->mem_end = control_port->end;
 	ndev->netdev_ops = &altera_tse_netdev_ops;
@@ -2202,7 +2217,6 @@ static int coretse_probe(struct platform_device *pdev)
 	/* Scatter/gather IO is not supported,
 	 * so it is turned off
 	 */
-	dev_info(&pdev->dev, "SG off\n");
 	ndev->hw_features &= ~NETIF_F_SG;
 	ndev->features |= ndev->hw_features | NETIF_F_HIGHDMA;
 
@@ -2213,29 +2227,23 @@ static int coretse_probe(struct platform_device *pdev)
 	ndev->features |= NETIF_F_HW_VLAN_CTAG_RX;
 
 	/* setup NAPI interface */
-	dev_info(&pdev->dev, "Add NAPI\n");
 	netif_napi_add(ndev, &priv->napi, tse_poll, NAPI_POLL_WEIGHT);
 
-	dev_info(&pdev->dev, "spin locks\n");
 	spin_lock_init(&priv->mac_cfg_lock);
 	spin_lock_init(&priv->tx_lock);
 	spin_lock_init(&priv->rxdma_irq_lock);
 
-	dev_info(&pdev->dev, "carrier off\n");
 	netif_carrier_off(ndev);
-	dev_info(&pdev->dev, "register netdev\n");
 	ret = register_netdev(ndev);
 	if (ret) {
 		dev_err(&pdev->dev, "failed to register TSE net device\n");
 		goto err_register_netdev;
 	}
 
-	dev_info(&pdev->dev, "platform_set_drvdata\n");
 	platform_set_drvdata(pdev, ndev);
 
-	priv->revision = ioread32(&priv->mac_dev->megacore_revision);
+	//priv->revision = ioread32(&priv->mac_dev->megacore_revision);
 
-	dev_info(&pdev->dev, "netif probe\n");
 	if (netif_msg_probe(priv))
 		dev_info(&pdev->dev, "Altera TSE MAC version %d.%d at 0x%08lx irq %d/%d\n",
 			 (priv->revision >> 8) & 0xff,
@@ -2243,13 +2251,13 @@ static int coretse_probe(struct platform_device *pdev)
 			 (unsigned long) control_port->start, priv->rx_irq,
 			 priv->tx_irq);
 
-	/*
+        
 	ret = init_phy(ndev);
 	if (ret != 0) {
 		netdev_err(ndev, "Cannot attach to PHY (error: %d)\n", ret);
-		goto err_init_phy;
 	}
-	*/
+    
+
 	return 0;
 
 err_init_phy:
@@ -2269,41 +2277,61 @@ static int coretse_remove(struct platform_device *pdev)
 	struct net_device *ndev = platform_get_drvdata(pdev);
 	struct altera_tse_private *priv = netdev_priv(ndev);
 
-    printk("Coretse removing starts\n");
+    dev_info(&pdev->dev,"Coretse removing starts\n");
 
-	if (ndev->phydev) {
-		phy_disconnect(ndev->phydev);
-
-		if (of_phy_is_fixed_link(priv->device->of_node))
-			of_phy_deregister_fixed_link(priv->device->of_node);
-	}
+// 	if (ndev->phydev) {
+// 		phy_disconnect(ndev->phydev);
+// 
+// 		if (of_phy_is_fixed_link(priv->device->of_node))
+// 			of_phy_deregister_fixed_link(priv->device->of_node);
+// 	}
 
 	platform_set_drvdata(pdev, NULL);
-	altera_tse_mdio_destroy(ndev);
+// 	altera_tse_mdio_destroy(ndev);
 	unregister_netdev(ndev);
 	free_netdev(ndev);
 
 	return 0;
 }
 
+// static const struct coretse_dmaops coretse_dma = {
+// 	.coretse_dtype = CORETSE_DMA,
+// 	.dmamask = 64,
+// 	.reset_dma = msgdma_reset,
+// 	.enable_txirq = msgdma_enable_txirq,
+// 	.enable_rxirq = msgdma_enable_rxirq,
+// 	.disable_txirq = msgdma_disable_txirq,
+// 	.disable_rxirq = msgdma_disable_rxirq,
+// 	.clear_txirq = msgdma_clear_txirq,
+// 	.clear_rxirq = msgdma_clear_rxirq,
+// 	.tx_buffer = msgdma_tx_buffer,
+// 	.tx_completions = msgdma_tx_completions,
+// 	.add_rx_desc = msgdma_add_rx_desc,
+// 	.get_rx_status = msgdma_rx_status,
+// 	.init_dma = msgdma_initialize,
+// 	.uninit_dma = msgdma_uninitialize,
+// 	.start_rxdma = msgdma_start_rxdma,
+// };
 static const struct coretse_dmaops coretse_dma = {
-	.coretse_dtype = CORETSE_DMA,
-	.dmamask = 64,
-	.reset_dma = msgdma_reset,
-	.enable_txirq = msgdma_enable_txirq,
-	.enable_rxirq = msgdma_enable_rxirq,
-	.disable_txirq = msgdma_disable_txirq,
-	.disable_rxirq = msgdma_disable_rxirq,
-	.clear_txirq = msgdma_clear_txirq,
-	.clear_rxirq = msgdma_clear_rxirq,
-	.tx_buffer = msgdma_tx_buffer,
-	.tx_completions = msgdma_tx_completions,
-	.add_rx_desc = msgdma_add_rx_desc,
-	.get_rx_status = msgdma_rx_status,
-	.init_dma = msgdma_initialize,
-	.uninit_dma = msgdma_uninitialize,
-	.start_rxdma = msgdma_start_rxdma,
+    .coretse_dtype = CORETSE_DMA,
+    .dmamask = 64,
+    .reset_dma = mac_reset,
+    .enable_txirq = coretse_dma_enable_txirq,
+    .enable_rxirq = coretse_dma_enable_rxirq,
+    .disable_txirq = coretse_dma_disable_txirq,
+    .disable_rxirq = coretse_dma_disable_rxirq,
+    .clear_txirq = msgdma_clear_txirq,
+    .clear_rxirq = msgdma_clear_rxirq,
+    .tx_buffer = TSE_send_pkt,
+    .tx_completions = msgdma_tx_completions,
+    .add_rx_desc = msgdma_add_rx_desc,
+    .get_rx_status = msgdma_rx_status,
+    .init_dma = coretsedma_initialize,
+    .uninit_dma = coretsedma_uninitialize,
+    .start_rxdma = msgdma_start_rxdma,
 };
+
+
 
 static const struct coretse_dmaops coretse_nodma = {
     .coretse_dtype = CORETSE_NODMA,

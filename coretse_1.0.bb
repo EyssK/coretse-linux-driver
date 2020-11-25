@@ -20,6 +20,9 @@ SRC_URI = "file://Makefile \
            file://coretse_regs.h           \
            file://coretse_types.h          \
            file://coretse_user_config.h    \
+           file://coretse_dma.c            \
+           file://coretse_dma.h            \
+           file://coretse_dmahw.h          \
            file://crc32.c                  \
            file://crc32.h                  \
            file://vsc8575_phy.c            \
