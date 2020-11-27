@@ -45,8 +45,6 @@
 #include "core_tse.h"
 #include "coretse_dma.h"
 
-#define DEBUG
-
 static atomic_t instance_count = ATOMIC_INIT(~0);
 /* Module parameters */
 int debug = -1;
@@ -537,13 +535,13 @@ static irqreturn_t altera_isr(int irq, void *dev_id)
 	struct net_device *dev = dev_id;
 	struct altera_tse_private *priv;
 
-    netdev_dbg(priv->dev, "%s\n", __func__);
-    
 	if (unlikely(!dev)) {
 		pr_err("%s: invalid dev pointer\n", __func__);
 		return IRQ_NONE;
 	}
 	priv = netdev_priv(dev);
+    
+    netdev_dbg(priv->dev, "%s\n", __func__);
 
 	spin_lock(&priv->rxdma_irq_lock);
 	/* reset IRQs */
@@ -1238,6 +1236,8 @@ mac_reset
         struct altera_tse_mac __iomem *base_addr;
     } _tmp = {priv->mac_dev}, *this_tse = &_tmp;
 
+    netdev_dbg(priv->dev,"%s:%d: CFG1 = 0x%x\n",__func__,__LINE__, HAL_get_32bit_reg(priv->mac_dev,CFG1));
+        
     /* Reset MCXMAC TX functionality */
     HAL_set_32bit_reg_field(this_tse->base_addr, CFG1_TX_RST, 0x01u);
 
@@ -1270,6 +1270,8 @@ mac_reset
 
     /* Reset FIFO Tx system module */
     HAL_set_32bit_reg_field(this_tse->base_addr, FIFOCFG0_TFAB_RST, 0x01u);
+    
+    netdev_dbg(priv->dev,"%s:%d: CFG1 = 0x%x\n",__func__,__LINE__, HAL_get_32bit_reg(priv->mac_dev,CFG1));
 }
 
 
@@ -1307,22 +1309,22 @@ static void config_mac_hw(struct altera_tse_private * priv, const tse_cfg_t * cf
 //     HAL_ASSERT(TSE_SLOTTIME_MAXVAL >= cfg->slottime);
 
     /* Configure PHY related MII MGMT registers */
-    tempreg = (uint32_t)cfg->phyclk & MII_CLOCK_SELECT_MASK;
-
-    if(TSE_ENABLE == cfg->supress_preamble)
-    {
-        tempreg |= MII_PREAM_SUPRESS_MASK;
-    }
-
-    if(TSE_ENABLE == cfg->autoscan_phys)
-    {
-        tempreg |= MII_SCAN_AUTO_INC_MASK;
-    }
-
-    HAL_set_32bit_reg(this_tse->base_addr, MIIMGMT, tempreg);
+//     tempreg = (uint32_t)cfg->phyclk & MII_CLOCK_SELECT_MASK;
+// 
+//     if(TSE_ENABLE == cfg->supress_preamble)
+//     {
+//         tempreg |= MII_PREAM_SUPRESS_MASK;
+//     }
+// 
+//     if(TSE_ENABLE == cfg->autoscan_phys)
+//     {
+//         tempreg |= MII_SCAN_AUTO_INC_MASK;
+//     }
+// 
+//     HAL_set_32bit_reg(this_tse->base_addr, MIIMGMT, tempreg);
 
     /* Clear all reset bits */
-
+    netdev_dbg(priv->dev,"%s:%d: CFG1 = 0x%x\n",__func__,__LINE__, HAL_get_32bit_reg(priv->mac_dev,CFG1));
     /* Clear soft reset for MCXMAC, Tx function, Rx function, Tx MAC control and
        Rx MAC control.
      */
@@ -1333,7 +1335,7 @@ static void config_mac_hw(struct altera_tse_private * priv, const tse_cfg_t * cf
     HAL_set_32bit_reg_field(this_tse->base_addr, CFG1_RX_RST, 0x00u);
 
     /* Clear MIIMGMT */
-    HAL_set_32bit_reg_field(this_tse->base_addr, MIIMGMT_RESET_MII_MGMT, 0x00u);
+//     HAL_set_32bit_reg_field(this_tse->base_addr, MIIMGMT_RESET_MII_MGMT, 0x00u);
 
     HAL_set_32bit_reg_field(this_tse->base_addr, IFC_RESET, 0x00u);
 
@@ -1363,8 +1365,14 @@ static void config_mac_hw(struct altera_tse_private * priv, const tse_cfg_t * cf
     {
         tempreg |= CFG1_TX_FCTL_MASK;
     }
+    
+    // TEST 
+    tempreg |= CFG1_TX_EN_MASK;
+    tempreg |= CFG1_RX_EN_MASK;
 
     HAL_set_32bit_reg(this_tse->base_addr, CFG1, tempreg);
+    
+    netdev_dbg(priv->dev,"%s:%d: setting 0x%x CFG1 = 0x%x\n",__func__,__LINE__,tempreg, HAL_get_32bit_reg(priv->mac_dev,CFG1));
 
     if(TSE_ENABLE == cfg->fullduplex)
     {
@@ -1408,12 +1416,16 @@ static void config_mac_hw(struct altera_tse_private * priv, const tse_cfg_t * cf
 
     tempreg |= (((uint32_t)cfg->preamble_length) << CFG2_PREAM_LEN);
     HAL_set_32bit_reg(this_tse->base_addr, CFG2, tempreg);
+    
+    netdev_dbg(priv->dev,"%s:%d: setting 0x%x CFG2 = 0x%x\n",__func__,__LINE__,tempreg, HAL_get_32bit_reg(priv->mac_dev,CFG2));
 
     tempreg = cfg->btb_IFG;
     tempreg |= ((uint32_t)cfg->min_IFG << IFG_MINIFGENF);
     tempreg |= ((uint32_t)cfg->non_btb_IFG << IFG_NONBTBIPG);
 
     HAL_set_32bit_reg(this_tse->base_addr, IFG, tempreg);
+    
+    netdev_dbg(priv->dev,"%s:%d: setting 0x%x IFG = 0x%x\n",__func__,__LINE__,tempreg, HAL_get_32bit_reg(priv->mac_dev,IFG));    
 
     tempreg = (uint32_t)cfg->slottime & HALF_DUPLEX_SLOTTIME_MASK;
 
@@ -1442,7 +1454,12 @@ static void config_mac_hw(struct altera_tse_private * priv, const tse_cfg_t * cf
     tempreg |= (uint32_t)cfg->ABEB_truncvalue << HALF_DUPLEX_ABEB_TUNC_OFFSET;
 
     HAL_set_32bit_reg(this_tse->base_addr, HDX, tempreg);
+    
+    netdev_dbg(priv->dev,"%s:%d: setting 0x%x HDX = 0x%x\n",__func__,__LINE__,tempreg, HAL_get_32bit_reg(priv->mac_dev,HDX)); 
+        
     HAL_set_32bit_reg(this_tse->base_addr, FREMLEN, (uint32_t)cfg->max_frame_length);
+    
+    netdev_dbg(priv->dev,"%s:%d: setting 0x%x FREMLEN = 0x%x\n",__func__,__LINE__,tempreg, HAL_get_32bit_reg(priv->mac_dev,FREMLEN)); 
 
     /*Enable WoL*/
     if(TSE_WOL_DETECT_DISABLE != cfg->wol_enable)
@@ -1490,6 +1507,7 @@ static void config_mac_hw(struct altera_tse_private * priv, const tse_cfg_t * cf
     {
         HAL_set_32bit_reg_field(this_tse->base_addr, FIFOCFG5_HSTDRPLT64, 0x01);
     }
+    netdev_dbg(priv->dev,"%s:%d: CFG1 = 0x%x\n",__func__,__LINE__, HAL_get_32bit_reg(priv->mac_dev,CFG1));
 }
 
 static void update_mac_cfg(struct altera_tse_private * priv, u8 phy_addr)
@@ -1501,8 +1519,9 @@ static void update_mac_cfg(struct altera_tse_private * priv, u8 phy_addr)
     tse_speed_t speed;
     u8 fullduplex;
     u8 link_up;
+    netdev_dbg(priv->dev,"%s:%d: CFG1 = 0x%x\n",__func__,__LINE__, HAL_get_32bit_reg(priv->mac_dev,CFG1));
 
-	// NO PHY
+    // NO PHY
 #if (TSE_PHY_INTERFACE == TSE_1000BASEX)
     // link_up = msgmii_get_link_status(this_tse, &speed, &fullduplex);
 	link_up = TSE_LINK_UP;
@@ -1566,6 +1585,31 @@ static void update_mac_cfg(struct altera_tse_private * priv, u8 phy_addr)
     }
 }
 
+static void assign_station_addr
+(
+    struct altera_tse_private *priv,
+    const uint8_t mac_addr[6]
+)
+{
+    struct tmp {
+        struct altera_tse_mac __iomem *base_addr;
+    } _tmp = {priv->mac_dev}, *this_tse = &_tmp;
+    uint32_t address32;
+
+    address32 = ((uint32_t)mac_addr[5]) << 24u;
+    address32 |= ((uint32_t)mac_addr[4]) << 16u;
+    address32 |= ((uint32_t)mac_addr[3]) << 8u;
+    address32 |= ((uint32_t)mac_addr[2]);
+
+    HAL_set_32bit_reg(this_tse->base_addr, STADDRL, address32);
+
+    address32 = ((uint32_t)mac_addr[1]) << 24u;
+    address32 |= ((uint32_t)mac_addr[0]) << 16u;
+
+    HAL_set_32bit_reg(this_tse->base_addr, STADDRH, address32);
+
+}
+
 void
 TSE_init
 (
@@ -1575,7 +1619,9 @@ TSE_init
 {
 	struct coretse_mac *mac = (struct coretse_mac *)(priv->mac_dev);
     void __iomem *base_addr = mac;
-
+    
+    netdev_dbg(priv->dev,"%s:%d: CFG1 = 0x%x\n",__func__,__LINE__, HAL_get_32bit_reg(priv->mac_dev,CFG1));
+    
     HAL_set_32bit_reg_field(base_addr, CFG2_IF_MODE, 0x00u);
 
     if(cfg != 0)
@@ -1589,8 +1635,7 @@ TSE_init
         config_mac_hw(priv, cfg);
 
         /* Assign MAC station address */
-		// TODO
-        // assign_station_addr(this_tse, cfg->mac_addr);
+        assign_station_addr(priv, cfg->mac_addr);
 
         // init descriptors
         // coretse_dma_init(priv);
@@ -1599,59 +1644,6 @@ TSE_init
         // TODO
         // this_tse->tx_complete_handler = NULL_POINTER;
         // this_tse->pckt_rx_callback = NULL_POINTER;
-
-        /* Detect PHY */
-        if(cfg->phy_addr == TSE_PHY_ADDRESS_AUTO_DETECT)
-        {
-			// No phy handled by this driver
-            // this_tse->phy_addr = phy_probe(this_tse);
-            //HAL_ASSERT(this_tse->phy_addr <= PHY_ADDRESS_MAX);
-        }
-        else if (cfg->phy_addr == TSE_PHY_ADDRESS_NO_PHY)
-		{
-			priv->phy_addr = cfg->phy_addr;
-		}
-        else
-        {
-            if(cfg->phy_addr <= PHY_ADDRESS_MAX)
-            {
-                priv->phy_addr = cfg->phy_addr;
-            }
-            else
-            {
-                //HAL_ASSERT(0);/*User provided a Invalid PHY address*/
-            }
-        }
-#if (TSE_PHY_INTERFACE != TSE_1000BASEX)
-        /* Initialize PHY interface */
-        //TSE_phy_init(this_tse, this_tse->phy_addr);
-#endif
-
-#if ((TSE_PHY_INTERFACE == TSE_SGMII) || (TSE_PHY_INTERFACE == TSE_1000BASEX))
-        // msgmii_init(this_tse);
-#endif
-
-#if (TSE_PHY_INTERFACE != TSE_1000BASEX)
-        /*
-		TSE_phy_set_link_speed(this_tse,
-                               this_tse->phy_addr,
-                               cfg->speed_duplex_select);
-
-        if(TSE_ENABLE == cfg->aneg_enable)
-        {
-            TSE_phy_autonegotiate(this_tse, this_tse->phy_addr);
-        }
-        */
-#endif
-
-#if ((TSE_PHY_INTERFACE == TSE_SGMII) || (TSE_PHY_INTERFACE == TSE_1000BASEX))
-        /*
-        if(TSE_ENABLE == cfg->aneg_enable)
-        {
-            msgmii_autonegotiate(this_tse);
-        }
-        */
-#endif
 
         update_mac_cfg(priv, priv->phy_addr);
 
@@ -1670,14 +1662,18 @@ TSE_init
 
         /* Enable reception at MAC level.    */
         HAL_set_32bit_reg_field(base_addr, CFG1_RX_EN, 0x01u);
+        
+        netdev_dbg(priv->dev,"%s:%d: CFG1 = 0x%x\n",__func__,__LINE__, HAL_get_32bit_reg(priv->mac_dev,CFG1)); 
     }
+    netdev_info(priv->dev, "TSE_init completed\n");
 }
 
 static int coretse_open(struct altera_tse_private *priv) 
 {
 	static tse_cfg_t g_tse_config_1;
-	static u8 mac_address_1[6] = {0xB1, 0xB2, 0xB3, 0xB4, 0xB5, 0xB6};
-	
+	static u8* mac_address_1;
+    mac_address_1 = priv->dev->dev_addr;
+    
     TSE_cfg_struct_def_init(&g_tse_config_1);
 
     g_tse_config_1.phy_addr = 0;
@@ -1695,6 +1691,7 @@ static int coretse_open(struct altera_tse_private *priv)
     g_tse_config_1.framefilter = TSE_FC_DEFAULT_MASK;//TSE_FC_PROMISCOUS_MODE_MASK
     
     TSE_init(priv, &g_tse_config_1);
+    netdev_dbg(priv->dev,"%s:%d: CFG1 = 0x%x\n",__func__,__LINE__, HAL_get_32bit_reg(priv->mac_dev,CFG1));
     return 0;
 }
     
@@ -1820,7 +1817,7 @@ phy_error:
 static int tse_shutdown(struct net_device *dev)
 {
 	struct altera_tse_private *priv = netdev_priv(dev);
-	int ret;
+// 	int ret;
 	unsigned long int flags;
     
 	/* Stop the PHY */
@@ -1909,7 +1906,7 @@ static int request_and_map(struct platform_device *pdev, const char *name,
 static void key_test(struct platform_device *pdev) {
     //struct resource *region = pdev->resource;
     //struct device *device = &pdev->dev;
-    //int i;
+    int i;
     //tse_instance_t coretse;
     //tse_cfg_t cfg;
 
@@ -1946,12 +1943,14 @@ static void key_test(struct platform_device *pdev) {
     /* Send a frame */
     
 	/* Print resources available */
-	/*
+	
     for (i = 0; i < pdev->num_resources; i++) {
 		struct resource *r = &pdev->resource[i];
-        dev_info(&pdev->dev,"%d ressource %s type %d IORESOURCE_MEM %d",i, r->name,   resource_type(r), IORESOURCE_MEM);
+        dev_dbg(&pdev->dev,"%d ressource %s type=0x%lx IORESOURCE_MEM=0x%x\n",i, r->name,   resource_type(r), IORESOURCE_MEM);
+        dev_dbg(&pdev->dev,"start 0x%llx size 0x%llx\n", r->start, resource_size(r));
+        
 	}
-	*/
+	
 }
 
 // void phy_stub(struct net_device *ndev){
@@ -1975,7 +1974,7 @@ static int coretse_probe(struct platform_device *pdev)
 	const struct of_device_id *of_id = NULL;
 
     dev_info(&pdev->dev,"Coretse probing starts\n");
-    key_test(pdev);
+    
 
     ndev = alloc_etherdev(sizeof(struct altera_tse_private));
     if (!ndev) {
@@ -1996,45 +1995,42 @@ static int coretse_probe(struct platform_device *pdev)
 		priv->dmaops = (struct coretse_dmaops *)of_id->data;
 
 
+    key_test(pdev);
+    
 	if (priv->dmaops &&
 	    priv->dmaops->coretse_dtype == CORETSE_DMA) {
 		
-		/* TODO handles DMA buffers in device tree
-         * hard coded for now
-         */
 		/* Get the mapped address to the SGDMA descriptor memory */
-// 		ret = request_and_map(pdev, "s1", &dma_res, &descmap);
-// 		if (ret)
-// 			goto err_free_netdev;
-// 
-// 		/* Start of that memory is for transmit descriptors */
-// 		priv->tx_dma_desc = descmap;
-// 
-// 		/* First half is for tx descriptors, other half for tx */
-        priv->txdescmem = 0x4000;
-// 
-// 		priv->txdescmem_busaddr = (dma_addr_t)dma_res->start;
-// 
-// 		priv->rx_dma_desc = (void __iomem *)((uintptr_t)(descmap +
-// 						     priv->txdescmem));
-        priv->rxdescmem = 0x4000;
-// 		priv->rxdescmem_busaddr = dma_res->start;
-// 		priv->rxdescmem_busaddr += priv->txdescmem;
+		ret = request_and_map(pdev, "s1", &dma_res, &descmap);
+		if (ret)
+			goto err_free_netdev;
 
-        /* TODO only for 32bit ??
+		/* Start of that memory is for transmit descriptors */
+		priv->tx_dma_desc = descmap;
+
+		/* First half is for tx descriptors, other half for tx */
+        priv->txdescmem = resource_size(dma_res)/2;
+
+		priv->txdescmem_busaddr = (dma_addr_t)dma_res->start;
+
+		priv->rx_dma_desc = (void __iomem *)((uintptr_t)(descmap +
+						     priv->txdescmem));
+        priv->rxdescmem = resource_size(dma_res)/2;
+		priv->rxdescmem_busaddr = dma_res->start;
+		priv->rxdescmem_busaddr += priv->txdescmem;
+
 		if (upper_32_bits(priv->rxdescmem_busaddr)) {
 			dev_dbg(priv->device,
-				"SGDMA bus addresses greater than 32-bits\n");
+				"CORETSE DMA bus addresses greater than 32-bits\n");
 			ret = -EINVAL;
 			goto err_free_netdev;
 		}
 		if (upper_32_bits(priv->txdescmem_busaddr)) {
 			dev_dbg(priv->device,
-				"SGDMA bus addresses greater than 32-bits\n");
+				"CORETSE DMA bus addresses greater than 32-bits\n");
 			ret = -EINVAL;
 			goto err_free_netdev;
 		}
-		*/
 	} else if (priv->dmaops &&
 		   priv->dmaops->coretse_dtype == CORETSE_NODMA) {
         
@@ -2079,17 +2075,20 @@ static int coretse_probe(struct platform_device *pdev)
 		goto err_free_netdev;
 
 	/* MAC address space */
-	control_port = pdev->resource;
+// 	control_port = pdev->resource;
 
-	priv->mac_dev = (struct altera_tse_mac*)devm_ioremap(&pdev->dev, control_port->start, resource_size(control_port));
-	/*ret = request_and_map(pdev, "control_port", &control_port,
+// 	priv->mac_dev = (struct altera_tse_mac*)devm_ioremap(&pdev->dev, control_port->start, resource_size(control_port));
+	ret = request_and_map(pdev, "mac_registers", &control_port,
 			      (void __iomem **)&priv->mac_dev);
-			      */
-    dev_info(&pdev->dev,"control port start 0x%x size 0x%x priv->mac_dev %p\n",control_port->start,resource_size(control_port), priv->mac_dev);
+    dev_info(&pdev->dev,"control port start 0x%llx size 0x%llx priv->mac_dev 0x%p\n",control_port->start,resource_size(control_port), priv->mac_dev);
 	if (!priv->mac_dev) {
 		dev_err(&pdev->dev,"Cannot map MAC address space\n");
 		goto err_free_netdev;
 	}
+	
+	// TODO TESTING
+// 	HAL_set_32bit_reg(priv->mac_dev, CFG1, (1<<CFG1_LOOPBACK_SHIFT) | (1<<CFG1_TX_EN_SHIFT) | (1<<CFG1_RX_EN_SHIFT));
+//     return 0;
 
 	/* xSGDMA Rx Dispatcher address space */
 	/*ret = request_and_map(pdev, "rx_csr", &dma_res,
@@ -2108,26 +2107,20 @@ static int coretse_probe(struct platform_device *pdev)
 
 
 	/* Rx IRQ */
-    // TODO handle in device tree
 	priv->rx_irq = platform_get_irq_byname(pdev, "rx_irq");
 	if (priv->rx_irq == -ENXIO) {
 		dev_err(&pdev->dev, "cannot obtain Rx IRQ\n");
 		ret = -ENXIO;
 		goto err_free_netdev;
 	}
-// 	priv->rx_irq = 31; /*FABRIC_F2H_0_PLIC*/
-
 
 	/* Tx IRQ */
-    // TODO handle in device tree
 	priv->tx_irq = platform_get_irq_byname(pdev, "tx_irq");
 	if (priv->tx_irq == -ENXIO) {
 		dev_err(&pdev->dev, "cannot obtain Tx IRQ\n");
 		ret = -ENXIO;
 		goto err_free_netdev;
 	}
-// 	priv->tx_irq = 31; /*FABRIC_F2H_0_PLIC*/
-
 
 	/* get FIFO depths from device tree */
 	/*
@@ -2245,7 +2238,7 @@ static int coretse_probe(struct platform_device *pdev)
 	//priv->revision = ioread32(&priv->mac_dev->megacore_revision);
 
 	if (netif_msg_probe(priv))
-		dev_info(&pdev->dev, "Altera TSE MAC version %d.%d at 0x%08lx irq %d/%d\n",
+		dev_info(&pdev->dev, "CoreTSE MAC version %d.%d at 0x%08lx irq %d/%d\n",
 			 (priv->revision >> 8) & 0xff,
 			 priv->revision & 0xff,
 			 (unsigned long) control_port->start, priv->rx_irq,
@@ -2260,8 +2253,8 @@ static int coretse_probe(struct platform_device *pdev)
 
 	return 0;
 
-err_init_phy:
-	unregister_netdev(ndev);
+// err_init_phy:
+// 	unregister_netdev(ndev);
 err_register_netdev:
 	netif_napi_del(&priv->napi);
 	altera_tse_mdio_destroy(ndev);
@@ -2279,12 +2272,12 @@ static int coretse_remove(struct platform_device *pdev)
 
     dev_info(&pdev->dev,"Coretse removing starts\n");
 
-// 	if (ndev->phydev) {
-// 		phy_disconnect(ndev->phydev);
-// 
-// 		if (of_phy_is_fixed_link(priv->device->of_node))
-// 			of_phy_deregister_fixed_link(priv->device->of_node);
-// 	}
+	if (ndev->phydev) {
+		phy_disconnect(ndev->phydev);
+
+		if (of_phy_is_fixed_link(priv->device->of_node))
+			of_phy_deregister_fixed_link(priv->device->of_node);
+	}
 
 	platform_set_drvdata(pdev, NULL);
 // 	altera_tse_mdio_destroy(ndev);

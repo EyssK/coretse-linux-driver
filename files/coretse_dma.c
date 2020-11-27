@@ -63,25 +63,19 @@ static void rx_desc_ring_init(struct altera_tse_private *priv)
     }
 }
 
-// #define set_csr(reg, bit) \
-//     ({ unsigned long __tmp; \
-//     asm volatile ("csrrs %0, " #reg ", %1" : "=r"(__tmp) : "rK"(bit)); \
-//     __tmp; })
-
 int coretsedma_initialize(struct altera_tse_private *priv)
 {
-    struct coretse_dma_instance *internal_var;
-    dev_dbg(priv->device, "%s\n",__func__);
+    struct coretse_dma_instance *dma_inst;
+    dev_dbg(priv->device, "%s, priv->rx_dma_desc=0x%p priv->rxdescmem=0x%lx\n",__func__,priv->rx_dma_desc,priv->rxdescmem );
     
     INIT_LIST_HEAD(&priv->txlisthd);
     INIT_LIST_HEAD(&priv->rxlisthd);
     
-    // allocate descriptor area :    
-    priv->rx_dma_desc = kmalloc(priv->rxdescmem, GFP_KERNEL);
-    priv->tx_dma_desc = kmalloc(priv->txdescmem, GFP_KERNEL);
-    
     priv->rxdescphys = (dma_addr_t) 0;
     priv->txdescphys = (dma_addr_t) 0;
+    
+    priv->tx_dma_desc = kmalloc(priv->txdescmem, GFP_KERNEL);
+    priv->rx_dma_desc = kmalloc(priv->rxdescmem, GFP_KERNEL);
     
     priv->rxdescphys = dma_map_single(priv->device,
                                       (void __force *)priv->rx_dma_desc,
@@ -103,22 +97,28 @@ int coretsedma_initialize(struct altera_tse_private *priv)
         return -EINVAL;
     }   
     
-    tx_desc_ring_init(priv);
-    rx_desc_ring_init(priv);
-    
     /* Initialize internal descriptors related variables. */
     priv->coretse_dma_instance = kmalloc(sizeof(struct coretse_dma_instance), GFP_KERNEL);
-    internal_var = priv->coretse_dma_instance;
+    dma_inst = priv->coretse_dma_instance;
     
-    internal_var->first_tx_index = INVALID_INDEX;
-    internal_var->last_tx_index = INVALID_INDEX;
-    internal_var->next_tx_index = 0;
-    internal_var->nb_available_tx_desc = TSE_TX_RING_SIZE;
+    /* Initialize descriptor memory, sync memory to cache */
+    tx_desc_ring_init(priv);
+    rx_desc_ring_init(priv);
+    dma_sync_single_for_device(priv->device, priv->txdescphys,
+				   priv->txdescmem, DMA_TO_DEVICE);
+	dma_sync_single_for_device(priv->device, priv->rxdescphys,
+				   priv->rxdescmem, DMA_TO_DEVICE);
+    
+    /* Initialize Tx descriptors related variables. */
+    dma_inst->first_tx_index = INVALID_INDEX;
+    dma_inst->last_tx_index = INVALID_INDEX;
+    dma_inst->next_tx_index = 0;
+    dma_inst->nb_available_tx_desc = TSE_TX_RING_SIZE;
     
     /* Initialize Rx descriptors related variables. */
-    internal_var->nb_available_rx_desc = TSE_RX_RING_SIZE;
-    internal_var->next_free_rx_desc_index = 0;
-    internal_var->first_rx_desc_index = INVALID_INDEX;
+    dma_inst->nb_available_rx_desc = TSE_RX_RING_SIZE;
+    dma_inst->next_free_rx_desc_index = 0;
+    dma_inst->first_rx_desc_index = INVALID_INDEX;
     
     /// TX/RX callback functions
     // TODO
@@ -128,11 +128,9 @@ int coretsedma_initialize(struct altera_tse_private *priv)
 //     TSE_set_rx_callback(&g_tse_0, mac_rx_callback);
 //     TSE_set_rx_callback(&g_tse_1, mac_rx_callback);
     
-    // enable interruptions
-//     set_csr(mstatus, 0x8 /*MSTATUS_MIE*/);
-    
-    dev_dbg(priv->device,"coretsedma_initialize priv->txdescphys 0x%x\n",priv->txdescphys);
-    dev_dbg(priv->device,"coretsedma_initialize priv->tx_dma_desc 0x%x\n", priv->tx_dma_desc);
+
+    dev_dbg(priv->device,"coretsedma_initialize priv->txdescphys 0x%llx\n",priv->txdescphys);
+    dev_dbg(priv->device,"coretsedma_initialize priv->tx_dma_desc %p\n", priv->tx_dma_desc);
     
     return 0;
 }
@@ -149,9 +147,9 @@ void coretsedma_uninitialize(struct altera_tse_private *priv)
         dma_unmap_single(priv->device, priv->txdescphys,
                          priv->txdescmem, DMA_TO_DEVICE);
         
-    kfree(priv->rx_dma_desc);
-    kfree(priv->tx_dma_desc);
     kfree(priv->coretse_dma_instance);
+    kfree(priv->tx_dma_desc);
+    kfree(priv->rx_dma_desc);
 }
 
 inline void
@@ -223,22 +221,26 @@ TSE_send_pkt
     } _tmp = {priv->mac_dev}, *this_tse = &_tmp;
     u8 status = 0;
     
-    struct coretse_dma_instance *internal_var = priv->coretse_dma_instance;
-    struct coretse_desc * p_next_tx_desc;
+    struct coretse_dma_instance *dma_inst = priv->coretse_dma_instance;
+    struct coretse_desc __iomem * tx_descs = priv->tx_dma_desc;
+    struct coretse_desc __iomem * p_next_tx_desc;
     
-    if(INVALID_INDEX == internal_var->first_tx_index)
+    if(INVALID_INDEX == dma_inst->first_tx_index)
     {
-        internal_var->first_tx_index = internal_var->next_tx_index;
+        dma_inst->first_tx_index = dma_inst->next_tx_index;
     }
     
-    internal_var->last_tx_index = internal_var->next_tx_index;
+    dma_inst->last_tx_index = dma_inst->next_tx_index;
     
-    p_next_tx_desc = &(priv->tx_dma_desc[internal_var->next_tx_index]);
-    p_next_tx_desc->pkt_start_addr = (u32)buffer->dma_addr;
+    p_next_tx_desc = &(tx_descs[dma_inst->next_tx_index]);
+    csrwr32(buffer->dma_addr, p_next_tx_desc, offsetof(struct coretse_desc, pkt_start_addr));
+    csrwr32(buffer->len,      p_next_tx_desc, offsetof(struct coretse_desc, pkt_size));
     //p_next_tx_desc->caller_info = p_user_data;
     
-    /* Set the packet length, packet overrides and clear descriptor empty: */
-    p_next_tx_desc->pkt_size = buffer->len;
+    dev_dbg(priv->device, "p_next_tx_desc=0x%p tx_descs=0x%p, dma_inst->next_tx_index=%d\n", p_next_tx_desc, tx_descs, dma_inst->next_tx_index);
+    
+    dma_sync_single_for_device(priv->device, priv->txdescphys,
+                               sizeof(struct coretse_desc), DMA_TO_DEVICE);
     
     /*
         *         If TX is found disabled, this might be because this is the first
@@ -246,12 +248,12 @@ TSE_send_pkt
         *         stopped transmission by itself caused by TX underrun or bus error.
         *         This function neglects the errors and tries to send the current packet.
         */
-    if(0 == HAL_get_32bit_reg_field(this_tse->base_addr, DMATXCTRL_TX_EN))
-    {
-        HAL_set_32bit_reg(this_tse->base_addr,
-                            DMATXDESC,
-                            (u32)p_next_tx_desc);
-    }
+//     if(0 == HAL_get_32bit_reg_field(this_tse->base_addr, DMATXCTRL_TX_EN))
+//     {
+//         HAL_set_32bit_reg(this_tse->base_addr,
+//                             DMATXDESC,
+//                             (u32)p_next_tx_desc);
+//     }
     
     /*
         *         Enable DMA transmit anyway to cover the case where Tx completed after
@@ -260,16 +262,16 @@ TSE_send_pkt
     HAL_set_32bit_reg_field(this_tse->base_addr, DMATXCTRL_TX_EN, 0x01);
     
     /*
-        *         Point the next_tx_desc to next free descriptor in the ring. Wrap around
-        *         in case next descriptor is pointing to last in the ring
-        */
-    if((TSE_TX_RING_SIZE - 1) == internal_var->next_tx_index)
+    *         Point the next_tx_desc to next free descriptor in the ring. Wrap around
+    *         in case next descriptor is pointing to last in the ring
+    */
+    if((TSE_TX_RING_SIZE - 1) == dma_inst->next_tx_index)
     {
-        internal_var->next_tx_index = 0;
+        dma_inst->next_tx_index = 0;
     }
     else
     {
-        ++internal_var->next_tx_index;
+        ++dma_inst->next_tx_index;
     }
     
     /*
