@@ -2,14 +2,6 @@
 #ifndef PORTAGE_H
 #define PORTAGE_H
 
-// defined to use assembly command from microchip driver
-// #define HW_ACCESS
-
-#ifdef HW_ACCESS
-#include "hw_reg_access.h"
-#endif
-
-
 #define NULL_POINTER                            0
 
 #define MAC_ADDRESS_LENGTH                      6u
@@ -39,6 +31,20 @@
 #endif /* NDEBUG */
 
 #define INVALID_INDEX                           (-1)
+
+/******
+* MAC interrupt definitions
+*/
+#define TSE_TXPKTSENT_IRQ                       0u
+#define TSE_TXUNDRRUN_IRQ                       1u
+#define TSE_TXBUSERR_IRQ                        3u
+#define TSE_RXPKTRCVD_IRQ                       4u
+#define TSE_RXOVRFLOW_IRQ                       6u
+#define TSE_RXBUSERR_IRQ                        7u
+#define TSE_INVALID_IRQ                         255u
+
+#define TSE_TXPKTSENT_IRQ_MASK                  0x01u
+#define TSE_RXPKTRCVD_IRQ_MASK                  ((uint32_t)0x01u << TSE_RXPKTRCVD_IRQ)
 /***************************************************************************//**
  */
 #define FIELD_OFFSET(FIELD_NAME)  (FIELD_NAME##_OFFSET)
@@ -54,14 +60,9 @@
  *              specified in a header file associated with the peripheral.
  * VALUE:       A variable of type uint32_t containing the value to write.
  */
- #ifndef HW_ACCESS
 #define HAL_set_32bit_reg(BASE_ADDR, REG_NAME, VALUE) \
              (csrwr32((VALUE), (BASE_ADDR), (REG_NAME##_REG_OFFSET)))
-#else
-#define HAL_set_32bit_reg(BASE_ADDR, REG_NAME, VALUE) \
-          (HW_set_32bit_reg( ((BASE_ADDR) + (REG_NAME##_REG_OFFSET)), (VALUE) ))
-#endif
-          
+
 /***************************************************************************//**
  * The macro HAL_get_32bit_reg() is used to read the value  of a 32 bits wide
  * register.
@@ -72,14 +73,9 @@
  *              specified in a header file associated with the peripheral.
  * RETURN:      This function-like macro returns a uint32_t value.
  */
- #ifndef HW_ACCESS
 #define HAL_get_32bit_reg(BASE_ADDR, REG_NAME) \
              (csrrd32((BASE_ADDR), (REG_NAME##_REG_OFFSET)))
-#else
-#define HAL_get_32bit_reg(BASE_ADDR, REG_NAME) \
-          (HW_get_32bit_reg( ((BASE_ADDR) + (REG_NAME##_REG_OFFSET)) ))
-#endif
-          
+
 /***************************************************************************//**
  * The macro HAL_set_32bit_reg_field() is used to write a field within a
  * 32 bits wide register. The field written can be one or more bits.
@@ -90,22 +86,14 @@
  *              are specified in a header file associated with the peripheral.
  * VALUE:       A variable of type uint32_t containing the field value to write.
  */
- #ifndef HW_ACCESS
 #define HAL_set_32bit_reg_field(BASE_ADDR, FIELD_NAME, VALUE) \
             do { \
                 u32 _value = csrrd32((BASE_ADDR), FIELD_OFFSET(FIELD_NAME));    \
-                _value &= (~FIELD_MASK(FIELD_NAME)) | ((VALUE) << FIELD_SHIFT(FIELD_NAME));                            \
+                _value &= (~FIELD_MASK(FIELD_NAME));                            \
+                _value |= ((VALUE) << FIELD_SHIFT(FIELD_NAME));                 \
                 csrwr32(_value, (BASE_ADDR), FIELD_OFFSET(FIELD_NAME));         \
             } while (0)
-#else
-#define HAL_set_32bit_reg_field(BASE_ADDR, FIELD_NAME, VALUE) \
-            (HW_set_32bit_reg_field(\
-                (BASE_ADDR) + FIELD_OFFSET(FIELD_NAME),\
-                FIELD_SHIFT(FIELD_NAME),\
-                FIELD_MASK(FIELD_NAME),\
-                (VALUE)))
-#endif
-            
+
 /***************************************************************************//**
  * The macro HAL_get_32bit_reg_field() is used to read a register field from
  * within a 32 bit wide peripheral register. The field can be one or more bits.
@@ -116,17 +104,9 @@
  *              are specified in a header file associated with the peripheral.
  * RETURN:      This function-like macro returns a uint32_t value.
  */
- #ifndef HW_ACCESS
 #define HAL_get_32bit_reg_field(BASE_ADDR, FIELD_NAME) \
              ((csrrd32((BASE_ADDR), FIELD_OFFSET(FIELD_NAME)) & FIELD_MASK(FIELD_NAME)) >> FIELD_SHIFT(FIELD_NAME))
-#else
-#define HAL_get_32bit_reg_field(BASE_ADDR, FIELD_NAME) \
-            (HW_get_32bit_reg_field(\
-                (BASE_ADDR) + FIELD_OFFSET(FIELD_NAME),\
-                FIELD_SHIFT(FIELD_NAME),\
-                FIELD_MASK(FIELD_NAME)))
-#endif
-            
+
 /***************************************************************************//**
  * The macro HAL_set_16bit_reg() allows writing a 16 bits wide register.
  *
@@ -136,14 +116,9 @@
  *              specified in a header file associated with the peripheral.
  * VALUE:       A variable of type uint_fast16_t containing the value to write.
  */
- #ifndef HW_ACCESS
 #define HAL_set_16bit_reg(BASE_ADDR, REG_NAME, VALUE) \
              (csrwr16((VALUE), (BASE_ADDR), (REG_NAME##_REG_OFFSET)))
-#else
-#define HAL_set_16bit_reg(BASE_ADDR, REG_NAME, VALUE) \
-            (HW_set_16bit_reg( ((BASE_ADDR) + (REG_NAME##_REG_OFFSET)), (VALUE) ))
-#endif
-            
+
 /***************************************************************************//**
  * The macro HAL_get_16bit_reg() is used to read the value  of a 16 bits wide
  * register.
@@ -154,14 +129,9 @@
  *              specified in a header file associated with the peripheral.
  * RETURN:      This function-like macro returns a uint16_t value.
  */
-#ifndef HW_ACCESS
 #define HAL_get_16bit_reg(BASE_ADDR, REG_NAME) \
              (csrrd16((BASE_ADDR), (REG_NAME##_REG_OFFSET)))
-#else
-#define HAL_get_16bit_reg(BASE_ADDR, REG_NAME) \
-            (HW_get_16bit_reg( (BASE_ADDR) + (REG_NAME##_REG_OFFSET) ))
-#endif
-            
+
 /***************************************************************************//**
  * The macro HAL_set_16bit_reg_field() is used to write a field within a
  * 16 bits wide register. The field written can be one or more bits.
@@ -172,22 +142,15 @@
  *              are specified in a header file associated with the peripheral.
  * VALUE:       A variable of type uint16_t containing the field value to write.
  */
- #ifndef HW_ACCESS
+
 #define HAL_set_16bit_reg_field(BASE_ADDR, FIELD_NAME, VALUE) \
             do { \
                 u16 _value = csrrd16((BASE_ADDR), FIELD_OFFSET(FIELD_NAME));    \
-                _value &= (~FIELD_MASK(FIELD_NAME)) | ((VALUE) << FIELD_SHIFT(FIELD_NAME));                            \
+                _value &= (~FIELD_MASK(FIELD_NAME));                            \
+                _value |= ((VALUE) << FIELD_SHIFT(FIELD_NAME));                 \
                 csrwr16(_value, (BASE_ADDR), FIELD_OFFSET(FIELD_NAME));         \
             } while (0)
-#else
-#define HAL_set_16bit_reg_field(BASE_ADDR, FIELD_NAME, VALUE) \
-            (HW_set_16bit_reg_field(\
-                (BASE_ADDR) + FIELD_OFFSET(FIELD_NAME),\
-                FIELD_SHIFT(FIELD_NAME),\
-                FIELD_MASK(FIELD_NAME),\
-                (VALUE)))
-#endif
-            
+
 /***************************************************************************//**
  * The macro HAL_get_16bit_reg_field() is used to read a register field from
  * within a 8 bit wide peripheral register. The field can be one or more bits.
@@ -198,17 +161,9 @@
  *              are specified in a header file associated with the peripheral.
  * RETURN:      This function-like macro returns a uint16_t value.
  */
- #ifndef HW_ACCESS
 #define HAL_get_16bit_reg_field(BASE_ADDR, FIELD_NAME) \
              ((csrrd16((BASE_ADDR), FIELD_OFFSET(FIELD_NAME)) & FIELD_MASK(FIELD_NAME)) >> FIELD_SHIFT(FIELD_NAME))
-#else
-#define HAL_get_16bit_reg_field(BASE_ADDR, FIELD_NAME) \
-            (HW_get_16bit_reg_field(\
-                (BASE_ADDR) + FIELD_OFFSET(FIELD_NAME),\
-                FIELD_SHIFT(FIELD_NAME),\
-                FIELD_MASK(FIELD_NAME)))
-#endif
-            
+
 /***************************************************************************//**
  * The macro HAL_set_8bit_reg() allows writing a 8 bits wide register.
  *
@@ -218,14 +173,9 @@
  *              specified in a header file associated with the peripheral.
  * VALUE:       A variable of type uint_fast8_t containing the value to write.
  */
- #ifndef HW_ACCESS
 #define HAL_set_8bit_reg(BASE_ADDR, REG_NAME, VALUE) \
              (csrwr6((VALUE), (BASE_ADDR), (REG_NAME##_REG_OFFSET)))
-#else
-#define HAL_set_8bit_reg(BASE_ADDR, REG_NAME, VALUE) \
-          (HW_set_8bit_reg( ((BASE_ADDR) + (REG_NAME##_REG_OFFSET)), (VALUE) ))
-#endif
-          
+
 /***************************************************************************//**
  * The macro HAL_get_8bit_reg() is used to read the value of a 8 bits wide
  * register.
@@ -236,32 +186,20 @@
  *              specified in a header file associated with the peripheral.
  * RETURN:      This function-like macro returns a uint8_t value.
  */
- #ifndef HW_ACCESS
+
 #define HAL_get_8bit_reg(BASE_ADDR, REG_NAME) \
           (csrrd8((BASE_ADDR), (REG_NAME##_REG_OFFSET)))
-#else
-#define HAL_get_8bit_reg(BASE_ADDR, REG_NAME) \
-          (HW_get_8bit_reg( (BASE_ADDR) + (REG_NAME##_REG_OFFSET) ))
-#endif
-          
+
 /***************************************************************************//**
  */
-#ifndef HW_ACCESS
 #define HAL_set_8bit_reg_field(BASE_ADDR, FIELD_NAME, VALUE) \
             do { \
                 u8 _value = csrrd8((BASE_ADDR), FIELD_OFFSET(FIELD_NAME));    \
-                _value &= (~FIELD_MASK(FIELD_NAME)) | ((VALUE) << FIELD_SHIFT(FIELD_NAME));                            \
-                csrwr8(_value, (BASE_ADDR), FIELD_OFFSET(FIELD_NAME));         \
+                _value &= (~FIELD_MASK(FIELD_NAME));                          \
+                _value |= ((VALUE) << FIELD_SHIFT(FIELD_NAME));               \
+                csrwr8(_value, (BASE_ADDR), FIELD_OFFSET(FIELD_NAME));        \
             } while (0)
-#else
-#define HAL_set_8bit_reg_field(BASE_ADDR, FIELD_NAME, VALUE) \
-            (HW_set_8bit_reg_field(\
-                (BASE_ADDR) + FIELD_OFFSET(FIELD_NAME),\
-                FIELD_SHIFT(FIELD_NAME),\
-                FIELD_MASK(FIELD_NAME),\
-                (VALUE)))
-#endif
-            
+
 /***************************************************************************//**
  * The macro HAL_get_8bit_reg_field() is used to read a register field from
  * within a 8 bit wide peripheral register. The field can be one or more bits.
@@ -272,15 +210,7 @@
  *              are specified in a header file associated with the peripheral.
  * RETURN:      This function-like macro returns a uint8_t value.
  */
- #ifndef HW_ACCESS
 #define HAL_get_8bit_reg_field(BASE_ADDR, FIELD_NAME) \
              ((csrrd8((BASE_ADDR), FIELD_OFFSET(FIELD_NAME)) & FIELD_MASK(FIELD_NAME)) >> FIELD_SHIFT(FIELD_NAME))
-#else
-#define HAL_get_8bit_reg_field(BASE_ADDR, FIELD_NAME) \
-            (HW_get_8bit_reg_field(\
-                (BASE_ADDR) + FIELD_OFFSET(FIELD_NAME),\
-                FIELD_SHIFT(FIELD_NAME),\
-                FIELD_MASK(FIELD_NAME)))
-#endif
-            
+
 #endif /*PORTAGE_H*/

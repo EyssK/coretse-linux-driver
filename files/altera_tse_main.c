@@ -378,7 +378,8 @@ static int tse_rx(struct altera_tse_private *priv, int limit)
 	u16 pktlength;
 	u16 pktstatus;
 
-    dev_dbg(priv->device, "%s\n",__func__);
+    // TEST
+    netdev_dbg(priv->dev, "%s\n",__func__);
     
 	/* Check for count < limit first as get_rx_status is changing
 	* the response-fifo so we must process the next packet
@@ -399,7 +400,7 @@ static int tse_rx(struct altera_tse_private *priv, int limit)
 		 * IP payload alignment. Status returned by get_rx_status()
 		 * contains DMA transfer length. Packet is 2 bytes shorter.
 		 */
-		pktlength -= 2;
+// 		pktlength -= 2;
 
 		count++;
 		next_entry = (++priv->rx_cons) % priv->rx_ring_size;
@@ -454,7 +455,7 @@ static int tse_tx_complete(struct altera_tse_private *priv)
 	struct tse_buffer *tx_buff;
 	int txcomplete = 0;
 
-    dev_dbg(priv->device, "%s\n",__func__);
+    netdev_dbg(priv->dev, "%s\n",__func__);
     
 	spin_lock(&priv->tx_lock);
 
@@ -502,12 +503,7 @@ static int tse_poll(struct napi_struct *napi, int budget)
 			container_of(napi, struct altera_tse_private, napi);
 	int rxcomplete = 0;
 	unsigned long int flags;
-	
-    netdev_dbg(priv->dev, "%s\n", __func__);
     
-	/* TODO */
-	return 0;
-
 	tse_tx_complete(priv);
 
 	rxcomplete = tse_rx(priv, budget);
@@ -540,8 +536,6 @@ static irqreturn_t altera_isr(int irq, void *dev_id)
 		return IRQ_NONE;
 	}
 	priv = netdev_priv(dev);
-    
-    netdev_dbg(priv->dev, "%s\n", __func__);
 
 	spin_lock(&priv->rxdma_irq_lock);
 	/* reset IRQs */
@@ -556,7 +550,6 @@ static irqreturn_t altera_isr(int irq, void *dev_id)
 		spin_unlock(&priv->rxdma_irq_lock);
 		__napi_schedule(&priv->napi);
 	}
-
 
 	return IRQ_HANDLED;
 }
@@ -579,8 +572,6 @@ static netdev_tx_t tse_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	netdev_tx_t ret = NETDEV_TX_OK;
 	dma_addr_t dma_addr;
 
-    netdev_dbg(priv->dev, "%s\n", __func__);
-    
 	spin_lock_bh(&priv->tx_lock);
 
 	if (unlikely(tse_tx_avail(priv) < nfrags + 1)) {
@@ -1016,9 +1007,6 @@ static void tse_set_mac(struct altera_tse_private *priv, bool enable)
  */
 static int tse_change_mtu(struct net_device *dev, int new_mtu)
 {
-	/* TODO */
-	return 0;
-	
 	if (netif_running(dev)) {
 		netdev_err(dev, "must be stopped to change its MTU\n");
 		return -EBUSY;
@@ -1235,8 +1223,6 @@ mac_reset
     struct tmp {
         struct altera_tse_mac __iomem *base_addr;
     } _tmp = {priv->mac_dev}, *this_tse = &_tmp;
-
-    netdev_dbg(priv->dev,"%s:%d: CFG1 = 0x%x\n",__func__,__LINE__, HAL_get_32bit_reg(priv->mac_dev,CFG1));
         
     /* Reset MCXMAC TX functionality */
     HAL_set_32bit_reg_field(this_tse->base_addr, CFG1_TX_RST, 0x01u);
@@ -1270,8 +1256,6 @@ mac_reset
 
     /* Reset FIFO Tx system module */
     HAL_set_32bit_reg_field(this_tse->base_addr, FIFOCFG0_TFAB_RST, 0x01u);
-    
-    netdev_dbg(priv->dev,"%s:%d: CFG1 = 0x%x\n",__func__,__LINE__, HAL_get_32bit_reg(priv->mac_dev,CFG1));
 }
 
 
@@ -1324,7 +1308,6 @@ static void config_mac_hw(struct altera_tse_private * priv, const tse_cfg_t * cf
 //     HAL_set_32bit_reg(this_tse->base_addr, MIIMGMT, tempreg);
 
     /* Clear all reset bits */
-    netdev_dbg(priv->dev,"%s:%d: CFG1 = 0x%x\n",__func__,__LINE__, HAL_get_32bit_reg(priv->mac_dev,CFG1));
     /* Clear soft reset for MCXMAC, Tx function, Rx function, Tx MAC control and
        Rx MAC control.
      */
@@ -1366,13 +1349,7 @@ static void config_mac_hw(struct altera_tse_private * priv, const tse_cfg_t * cf
         tempreg |= CFG1_TX_FCTL_MASK;
     }
     
-    // TEST 
-    tempreg |= CFG1_TX_EN_MASK;
-    tempreg |= CFG1_RX_EN_MASK;
-
     HAL_set_32bit_reg(this_tse->base_addr, CFG1, tempreg);
-    
-    netdev_dbg(priv->dev,"%s:%d: setting 0x%x CFG1 = 0x%x\n",__func__,__LINE__,tempreg, HAL_get_32bit_reg(priv->mac_dev,CFG1));
 
     if(TSE_ENABLE == cfg->fullduplex)
     {
@@ -1403,11 +1380,11 @@ static void config_mac_hw(struct altera_tse_private * priv, const tse_cfg_t * cf
         tempreg |= CFG2_HUGE_FRAME_EN_MASK;
     }
 
-    if((TSE_PHY_INTERFACE == TSE_MII) || (TSE_PHY_INTERFACE == TSE_RMII))
-    {
-        /* MII and RMII use nibble mode interface. */
-        tempreg |= CFG2_NIBBLE_MASK;
-    }
+//     if((TSE_PHY_INTERFACE == TSE_MII) || (TSE_PHY_INTERFACE == TSE_RMII))
+//     {
+//         /* MII and RMII use nibble mode interface. */
+//         tempreg |= CFG2_NIBBLE_MASK;
+//     }
     else
     {
         /* TBI and GMII use byte interface. */
@@ -1416,8 +1393,6 @@ static void config_mac_hw(struct altera_tse_private * priv, const tse_cfg_t * cf
 
     tempreg |= (((uint32_t)cfg->preamble_length) << CFG2_PREAM_LEN);
     HAL_set_32bit_reg(this_tse->base_addr, CFG2, tempreg);
-    
-    netdev_dbg(priv->dev,"%s:%d: setting 0x%x CFG2 = 0x%x\n",__func__,__LINE__,tempreg, HAL_get_32bit_reg(priv->mac_dev,CFG2));
 
     tempreg = cfg->btb_IFG;
     tempreg |= ((uint32_t)cfg->min_IFG << IFG_MINIFGENF);
@@ -1425,8 +1400,6 @@ static void config_mac_hw(struct altera_tse_private * priv, const tse_cfg_t * cf
 
     HAL_set_32bit_reg(this_tse->base_addr, IFG, tempreg);
     
-    netdev_dbg(priv->dev,"%s:%d: setting 0x%x IFG = 0x%x\n",__func__,__LINE__,tempreg, HAL_get_32bit_reg(priv->mac_dev,IFG));    
-
     tempreg = (uint32_t)cfg->slottime & HALF_DUPLEX_SLOTTIME_MASK;
 
     tempreg |= (uint32_t)cfg->max_retx_tries << HALF_DUPLEX_RETX_MAX_OFFSET;
@@ -1454,13 +1427,9 @@ static void config_mac_hw(struct altera_tse_private * priv, const tse_cfg_t * cf
     tempreg |= (uint32_t)cfg->ABEB_truncvalue << HALF_DUPLEX_ABEB_TUNC_OFFSET;
 
     HAL_set_32bit_reg(this_tse->base_addr, HDX, tempreg);
-    
-    netdev_dbg(priv->dev,"%s:%d: setting 0x%x HDX = 0x%x\n",__func__,__LINE__,tempreg, HAL_get_32bit_reg(priv->mac_dev,HDX)); 
         
     HAL_set_32bit_reg(this_tse->base_addr, FREMLEN, (uint32_t)cfg->max_frame_length);
     
-    netdev_dbg(priv->dev,"%s:%d: setting 0x%x FREMLEN = 0x%x\n",__func__,__LINE__,tempreg, HAL_get_32bit_reg(priv->mac_dev,FREMLEN)); 
-
     /*Enable WoL*/
     if(TSE_WOL_DETECT_DISABLE != cfg->wol_enable)
     {
@@ -1522,17 +1491,14 @@ static void update_mac_cfg(struct altera_tse_private * priv, u8 phy_addr)
     netdev_dbg(priv->dev,"%s:%d: CFG1 = 0x%x\n",__func__,__LINE__, HAL_get_32bit_reg(priv->mac_dev,CFG1));
 
     // NO PHY
-#if (TSE_PHY_INTERFACE == TSE_1000BASEX)
+// #if (TSE_PHY_INTERFACE == TSE_1000BASEX)
     // link_up = msgmii_get_link_status(this_tse, &speed, &fullduplex);
 	link_up = TSE_LINK_UP;
 	fullduplex = TSE_FULL_DUPLEX;
 	speed = TSE_MAC1000MBPS;
-#else
-    // link_up = TSE_phy_get_link_status(this_tse, phy_addr, &speed, &fullduplex);
-	link_up = TSE_LINK_UP;
-	fullduplex = TSE_FULL_DUPLEX;
-	speed = TSE_MAC1000MBPS;
-#endif
+// #else
+//     // link_up = TSE_phy_get_link_status(this_tse, phy_addr, &speed, &fullduplex);
+// #endif
 
     if(TSE_LINK_DOWN != link_up)
     {
@@ -1657,13 +1623,15 @@ TSE_init
         /* Enable default Flow Control at MAC level.    */
         HAL_set_32bit_reg(base_addr, FPC, cfg->framefilter);
 
+        netdev_dbg(priv->dev,"%s:%d: before enable CFG1 = 0x%x\n",__func__,__LINE__, HAL_get_32bit_reg(priv->mac_dev,CFG1));
+
         /* Enable transmission at MAC level. */
         HAL_set_32bit_reg_field(base_addr, CFG1_TX_EN, 0x01u);
 
         /* Enable reception at MAC level.    */
         HAL_set_32bit_reg_field(base_addr, CFG1_RX_EN, 0x01u);
-        
-        netdev_dbg(priv->dev,"%s:%d: CFG1 = 0x%x\n",__func__,__LINE__, HAL_get_32bit_reg(priv->mac_dev,CFG1)); 
+
+        netdev_dbg(priv->dev,"%s:%d: after enable CFG1 = 0x%x\n",__func__,__LINE__, HAL_get_32bit_reg(priv->mac_dev,CFG1));
     }
     netdev_info(priv->dev, "TSE_init completed\n");
 }
@@ -1673,7 +1641,7 @@ static int coretse_open(struct altera_tse_private *priv)
 	static tse_cfg_t g_tse_config_1;
 	static u8* mac_address_1;
     mac_address_1 = priv->dev->dev_addr;
-    
+
     TSE_cfg_struct_def_init(&g_tse_config_1);
 
     g_tse_config_1.phy_addr = 0;
@@ -1688,8 +1656,8 @@ static int coretse_open(struct altera_tse_private *priv)
     g_tse_config_1.mac_addr[3] = mac_address_1[3];
     g_tse_config_1.mac_addr[4] = mac_address_1[4];
     g_tse_config_1.mac_addr[5] = mac_address_1[5];
-    g_tse_config_1.framefilter = TSE_FC_DEFAULT_MASK;//TSE_FC_PROMISCOUS_MODE_MASK
-    
+    g_tse_config_1.framefilter = TSE_FC_DEFAULT_MASK | TSE_FC_PROMISCOUS_MODE_MASK;
+
     TSE_init(priv, &g_tse_config_1);
     netdev_dbg(priv->dev,"%s:%d: CFG1 = 0x%x\n",__func__,__LINE__, HAL_get_32bit_reg(priv->mac_dev,CFG1));
     return 0;
@@ -1766,16 +1734,15 @@ static int tse_open(struct net_device *dev)
 		goto init_error;
 	}
 
-
 	/* Register TX interrupt */
     // Only ONE IRQ with coretse mac
-// 	ret = request_irq(priv->tx_irq, altera_isr, IRQF_SHARED,
-// 			  dev->name, dev);
-// 	if (ret) {
-// 		netdev_err(dev, "Unable to register TX interrupt %d\n",
-// 			   priv->tx_irq);
-// 		goto tx_request_irq_error;
-// 	}
+	ret = request_irq(priv->tx_irq, altera_isr, IRQF_SHARED,
+			  dev->name, dev);
+	if (ret) {
+		netdev_err(dev, "Unable to register TX interrupt %d\n",
+			   priv->tx_irq);
+		goto tx_request_irq_error;
+	}
 
 	/* Enable DMA interrupts */
 	spin_lock_irqsave(&priv->rxdma_irq_lock, flags);
@@ -1838,7 +1805,7 @@ static int tse_shutdown(struct net_device *dev)
 
 	/* Free the IRQ lines */
 	free_irq(priv->rx_irq, dev);
-// 	free_irq(priv->tx_irq, dev);
+	free_irq(priv->tx_irq, dev);
 
 	/* disable and reset the MAC, empties fifo */
 	spin_lock(&priv->mac_cfg_lock);
@@ -1846,6 +1813,7 @@ static int tse_shutdown(struct net_device *dev)
 
     // TODO
 // 	ret = reset_mac(priv);
+    mac_reset(priv);
 	/* Note that reset_mac will fail if the clocks are gated by the PHY
 	 * due to the PHY being put into isolation or power down mode.
 	 * This is not an error if reset fails due to no clock.
@@ -1902,7 +1870,6 @@ static int request_and_map(struct platform_device *pdev, const char *name,
 	return 0;
 }
 
-// #include "core_tse.h"
 static void key_test(struct platform_device *pdev) {
     //struct resource *region = pdev->resource;
     //struct device *device = &pdev->dev;
@@ -1930,26 +1897,15 @@ static void key_test(struct platform_device *pdev) {
     }
     */
 
-    /* Cfg MAC */
-    /*
-    TSE_cfg_struct_def_init( &cfg );
-    TSE_init( &coretse, coretse.base_addr, &cfg);
-    */
-    
-    /* DMA */
-
-    /* Set in Loopback */
-
     /* Send a frame */
     
-	/* Print resources available */
-	
-    for (i = 0; i < pdev->num_resources; i++) {
-		struct resource *r = &pdev->resource[i];
-        dev_dbg(&pdev->dev,"%d ressource %s type=0x%lx IORESOURCE_MEM=0x%x\n",i, r->name,   resource_type(r), IORESOURCE_MEM);
-        dev_dbg(&pdev->dev,"start 0x%llx size 0x%llx\n", r->start, resource_size(r));
-        
-	}
+	/* list resources available */
+//     for (i = 0; i < pdev->num_resources; i++) {
+// 		struct resource *r = &pdev->resource[i];
+//         dev_dbg(&pdev->dev,"%d ressource %s type=0x%lx IORESOURCE_MEM=0x%x\n",i, r->name,   resource_type(r), IORESOURCE_MEM);
+//         dev_dbg(&pdev->dev,"start 0x%llx size 0x%llx\n", r->start, resource_size(r));
+//
+// 	}
 	
 }
 
@@ -2031,6 +1987,10 @@ static int coretse_probe(struct platform_device *pdev)
 			ret = -EINVAL;
 			goto err_free_netdev;
 		}
+		dev_dbg(&pdev->dev,"tx_dma_desc=0x%p\n", priv->tx_dma_desc);
+        dev_dbg(&pdev->dev,"txdescmem=0x%x\n", priv->txdescmem);
+        dev_dbg(&pdev->dev,"txdescmem_busaddr=0x%llx\n", priv->txdescmem_busaddr);
+
 	} else if (priv->dmaops &&
 		   priv->dmaops->coretse_dtype == CORETSE_NODMA) {
         
@@ -2085,10 +2045,6 @@ static int coretse_probe(struct platform_device *pdev)
 		dev_err(&pdev->dev,"Cannot map MAC address space\n");
 		goto err_free_netdev;
 	}
-	
-	// TODO TESTING
-// 	HAL_set_32bit_reg(priv->mac_dev, CFG1, (1<<CFG1_LOOPBACK_SHIFT) | (1<<CFG1_TX_EN_SHIFT) | (1<<CFG1_RX_EN_SHIFT));
-//     return 0;
 
 	/* xSGDMA Rx Dispatcher address space */
 	/*ret = request_and_map(pdev, "rx_csr", &dma_res,
@@ -2308,17 +2264,17 @@ static int coretse_remove(struct platform_device *pdev)
 static const struct coretse_dmaops coretse_dma = {
     .coretse_dtype = CORETSE_DMA,
     .dmamask = 64,
-    .reset_dma = mac_reset,
+    .reset_dma = coretse_dma_reset,
     .enable_txirq = coretse_dma_enable_txirq,
     .enable_rxirq = coretse_dma_enable_rxirq,
     .disable_txirq = coretse_dma_disable_txirq,
     .disable_rxirq = coretse_dma_disable_rxirq,
-    .clear_txirq = msgdma_clear_txirq,
-    .clear_rxirq = msgdma_clear_rxirq,
+    .clear_txirq = coretsedma_clear_txirq,
+    .clear_rxirq = coretsedma_clear_rxirq,
     .tx_buffer = TSE_send_pkt,
-    .tx_completions = msgdma_tx_completions,
-    .add_rx_desc = msgdma_add_rx_desc,
-    .get_rx_status = msgdma_rx_status,
+    .tx_completions = coretsedma_tx_completions,
+    .add_rx_desc = coretsedma_add_rx_desc,
+    .get_rx_status = coretsedma_rx_status,
     .init_dma = coretsedma_initialize,
     .uninit_dma = coretsedma_uninitialize,
     .start_rxdma = msgdma_start_rxdma,
