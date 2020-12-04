@@ -15,5 +15,6 @@ u32 coretsedma_tx_completions(struct altera_tse_private *priv);
 int TSE_send_pkt(struct altera_tse_private *priv, struct tse_buffer *buffer);
 u32 coretsedma_rx_status(struct altera_tse_private *priv);
 void coretsedma_add_rx_desc(struct altera_tse_private *priv, struct tse_buffer *rxbuffer);
+void coretsedma_start_rxdma(struct altera_tse_private *priv);
 
 #endif /*  __CORETSE_DMA_H__ */

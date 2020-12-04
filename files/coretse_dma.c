@@ -10,26 +10,27 @@
 #include "portage.h"
 
 extern int debug;
+static void coretsedma_set_rx(struct altera_tse_private *priv, short index);
 
 static void tx_desc_ring_init(struct altera_tse_private *priv)
 {
     int inc;    
     struct coretse_desc* tx_dma_desc = priv->tx_dma_desc;
+    dma_addr_t next_tx_phys = priv->txdescphys;
     
     for(inc = 0; inc < TSE_TX_RING_SIZE; ++inc) {
         tx_dma_desc[inc].pkt_start_addr = 0u;
         tx_dma_desc[inc].pkt_size = DMA_DESC_EMPTY_FLAG_MASK;
-        
+ 
         if((TSE_TX_RING_SIZE - 1) == inc) {
-            tx_dma_desc[inc].next_desriptor =
-            (struct coretse_desc*)&tx_dma_desc[0];
+            tx_dma_desc[inc].next_desriptor = priv->txdescphys & 0xFFFFFFFC;
         }
         else {
-            tx_dma_desc[inc].next_desriptor =
-            (struct coretse_desc*)&tx_dma_desc[inc + 1];
+            tx_dma_desc[inc].next_desriptor = next_tx_phys & 0xFFFFFFFC;
         }
-        
+ 
         tx_dma_desc[inc].index = inc;
+        next_tx_phys += sizeof(struct coretse_desc);
     }
 }
 
@@ -37,21 +38,21 @@ static void rx_desc_ring_init(struct altera_tse_private *priv)
 {
     int inc;
     struct coretse_desc* rx_dma_desc = priv->rx_dma_desc;
-    
+    dma_addr_t next_rx_phys = priv->rxdescphys;
+
     for(inc = 0; inc < TSE_RX_RING_SIZE; ++inc) {
         rx_dma_desc[inc].pkt_start_addr = 0u;
         rx_dma_desc[inc].pkt_size = 0u;
-        
+ 
         if((TSE_RX_RING_SIZE - 1) == inc) {
-            rx_dma_desc[inc].next_desriptor =
-            (struct coretse_desc*)&rx_dma_desc[0];
+            rx_dma_desc[inc].next_desriptor = priv->rxdescphys & 0xFFFFFFFC;
         }
         else {
-            rx_dma_desc[inc].next_desriptor =
-            (struct coretse_desc*)&rx_dma_desc[inc + 1];
+            rx_dma_desc[inc].next_desriptor = next_rx_phys & 0xFFFFFFFC;
         }
-        
+ 
         rx_dma_desc[inc].index = inc;
+        next_rx_phys += sizeof(struct coretse_desc);
     }
 }
 
@@ -110,7 +111,7 @@ int coretsedma_initialize(struct altera_tse_private *priv)
     /* Initialize Rx descriptors related variables. */
     dma_inst->nb_available_rx_desc = dma_rx_num;
     dma_inst->next_free_rx_desc_index = 0;
-    dma_inst->first_rx_desc_index = INVALID_INDEX;
+    dma_inst->first_rx_desc_index = 0;
     
     dev_dbg(priv->device,"coretsedma_initialize priv->txdescphys 0x%llx\n",priv->txdescphys);
     dev_dbg(priv->device,"coretsedma_initialize priv->tx_dma_desc %p\n", priv->tx_dma_desc);
@@ -198,32 +199,23 @@ u32 coretsedma_tx_completions(struct altera_tse_private *priv)
 {
     struct coretse_dma_instance *dma_inst;
     short index;
-    short completed = 0;
-    u32 empty_flag;
+    u32 dma_irq;
 
     dma_inst = priv->coretse_dma_instance;
     index = dma_inst->first_tx_index;
-    do {
+
+    spin_lock(&priv->rxdma_irq_lock);
+    dma_irq = priv->dma_irq_tx;
+    priv->dma_irq_tx = 0;
+    spin_unlock(&priv->rxdma_irq_lock);
+    if (dma_irq & DMATXSTATUS_TXPKT_SENT_MASK) {
         ++dma_inst->nb_available_tx_desc;
 
-        if(index == dma_inst->last_tx_index) {
-            /* all pending tx packets sent. */
-            dma_inst->first_tx_index = INVALID_INDEX;
-            dma_inst->last_tx_index = INVALID_INDEX;
-            completed = 1;
-        }
-        else {
-            index = (index+1) % TSE_TX_RING_SIZE;
-            dma_inst->first_tx_index = index;
-
-            /* Check if we reached a descriptor still pending tx. */
-            empty_flag = ((struct coretse_desc __iomem *)priv->tx_dma_desc)[index].pkt_size & DMA_DESC_EMPTY_FLAG_MASK;
-
-            if(0u == empty_flag) {
-                completed = 1u;
-            }
-        }
-    } while (completed == 0);
+        // Handling Tx one by one
+        /* all pending tx packets sent. */
+        dma_inst->first_tx_index = INVALID_INDEX;
+        dma_inst->last_tx_index = INVALID_INDEX;
+    }
     return 1;
 }
 
@@ -248,16 +240,17 @@ int TSE_send_pkt(struct altera_tse_private *priv, struct tse_buffer *buffer)
     p_next_tx_desc = &(tx_descs[dma_inst->next_tx_index]);
     p_next_tx_desc->pkt_start_addr = buffer->dma_addr;
     p_next_tx_desc->pkt_size = buffer->len;
-    p_next_tx_desc->next_desriptor = NULL;
+    p_next_tx_desc->next_desriptor = 0;
     p_next_tx_desc->index = 0;
-    p_next_tx_desc->caller_info = 0;
+    //p_next_tx_desc->caller_info = 0;
 
     next_tx_phys = priv->txdescphys + dma_inst->next_tx_index*sizeof(struct coretse_desc);
+    next_tx_phys &= 0xFFFFFFFF;
 
-    netdev_dbg(priv->dev, "p_next_tx_desc=0x%p tx_descs=\t0x%p\n", p_next_tx_desc, tx_descs);
-    netdev_dbg(priv->dev, "dma_inst->next_tx_index=\t%d\n", dma_inst->next_tx_index);
-    netdev_dbg(priv->dev, "send dma buffer=\t0x%llx\n", next_tx_phys);
-    netdev_dbg(priv->dev, "pkt add dma buffer=\t0x%x\n", p_next_tx_desc->pkt_start_addr);
+//    netdev_dbg(priv->dev, "p_next_tx_desc=0x%p tx_descs=\t0x%p\n", p_next_tx_desc, tx_descs);
+//    netdev_dbg(priv->dev, "dma_inst->next_tx_index=\t%d\n", dma_inst->next_tx_index);
+//    netdev_dbg(priv->dev, "send dma buffer=\t0x%llx\n", next_tx_phys);
+//    netdev_dbg(priv->dev, "pkt add dma buffer=\t0x%x\n", p_next_tx_desc->pkt_start_addr);
 
     dma_sync_single_for_device(priv->device, priv->txdescphys,
                                priv->txdescmem, DMA_TO_DEVICE);
@@ -308,8 +301,12 @@ u32 coretsedma_rx_status(struct altera_tse_private *priv) {
     u32 dma_irq;
     unsigned int rxstatus = 0;
 
-    dma_irq = HAL_get_32bit_reg(priv->mac_dev, DMAINTR);
-    if (dma_irq & TSE_RXPKTRCVD_IRQ_MASK) {
+    spin_lock(&priv->rxdma_irq_lock);
+    dma_irq = priv->dma_irq_rx;
+    priv->dma_irq_rx = 0;
+    spin_unlock(&priv->rxdma_irq_lock);
+    // netdev_dbg(priv->dev, "%s: dma_irq=0x%x\n", __func__, dma_irq);
+    if (dma_irq & DMARXSTATUS_RXPKT_RCVD_MASK) {
         // packet received
         netdev_dbg(priv->dev, "%s: Packet received\n",__func__);
 
@@ -321,38 +318,16 @@ u32 coretsedma_rx_status(struct altera_tse_private *priv) {
         rxstatus = (p_next_rx_desc->pkt_size & DMA_DESC_PKT_SIZE_MASK) - 4u;
 
         /* update first_rx_desc_index */
+        ++dma_inst->nb_available_rx_desc;
         dma_inst->first_rx_desc_index = (dma_inst->first_rx_desc_index + 1) % TSE_RX_RING_SIZE;
-
-        /*
-            * Clear the rx packet received interrupt once. If this bit still persists,
-            * then another rx packet received interrupt will be generated. Rx count
-            * will be decremented.
-            */
-        HAL_set_32bit_reg_field(this_tse->base_addr, DMARXSTATUS_RXPKT_RCVD, 0x1);
+        coretsedma_set_rx(priv,dma_inst->first_rx_desc_index);
     }
 
-    // Check errors
-    if(dma_irq & (1u << TSE_RXOVRFLOW_IRQ)) {
-        HAL_set_32bit_reg_field(this_tse->base_addr, DMARXSTATUS_RXPKT_OVR, 0x1);
-        HAL_set_32bit_reg_field(this_tse->base_addr, DMARXCTRL_RX_EN, 0x1);
-        netdev_dbg(priv->dev,"%s: TSE_RXOVRFLOW_IRQ\n", __func__);
-        rxstatus |= 0xFF0001;
-    }
-    if(dma_irq & (1u << TSE_RXBUSERR_IRQ)) {
-        /*
-         *     Clear the rx packet received interrupt once. If this bit still persists,
-         *     then another rx packet received interrupt will be generated. Rx count
-         *     will be decremented.
-         */
-        HAL_set_32bit_reg_field(this_tse->base_addr, DMARXSTATUS_BUSERR, 0x1);
-        netdev_dbg(priv->dev,"%s: TSE_RXBUSERR_IRQ\n", __func__);
-        rxstatus |= 0xFF0002;
-    }
     return rxstatus;
 }
 
 /*
- *  Add the buffer to the next free rx descriptor and arm it.
+ *  Add the buffer to the next free rx descriptor.
  */
 void coretsedma_add_rx_desc(struct altera_tse_private *priv, struct tse_buffer *rxbuffer)
 {
@@ -362,17 +337,19 @@ void coretsedma_add_rx_desc(struct altera_tse_private *priv, struct tse_buffer *
     struct coretse_dma_instance *dma_inst = priv->coretse_dma_instance;
     struct coretse_desc __iomem * rx_descs = priv->rx_dma_desc;
     short next_rx_desc_index;
-    dma_addr_t next_rx_phys;
 
     if(dma_inst->nb_available_rx_desc > 0)
     {
-        netdev_dbg(priv->dev, "%s: %d rx packet available\n",__func__, dma_inst->nb_available_rx_desc);
         --dma_inst->nb_available_rx_desc;
         next_rx_desc_index = dma_inst->next_free_rx_desc_index;
-        rx_descs[next_rx_desc_index].pkt_start_addr = rxbuffer->dma_addr;
+        rx_descs[next_rx_desc_index].pkt_start_addr = rxbuffer->dma_addr & 0xFFFFFFFF;
         /* Set own flag of this descriptor to indicate ready for RX */
-        rx_descs[next_rx_desc_index].pkt_size |= DMA_DESC_EMPTY_FLAG_MASK;
+        rx_descs[next_rx_desc_index].pkt_size = DMA_DESC_EMPTY_FLAG_MASK;
+        dma_sync_single_for_device(priv->device, priv->rxdescphys, priv->rxdescmem, DMA_TO_DEVICE);
 
+//      netdev_dbg(priv->dev, "%s: Desc=0x%llx Buffer=0x%llx\n",__func__,priv->rxdescphys + next_rx_desc_index*sizeof(struct coretse_desc), rxbuffer->dma_addr);
+//      netdev_dbg(priv->dev, "%s: PktSize=0x%x Next=0x%x\n",__func__, rx_descs[next_rx_desc_index].pkt_size, rx_descs[next_rx_desc_index].next_desriptor);
+	
         /*
          *     If the RX is found disabled, then it might be because this is the
          *     first time a packet is scheduled for reception or the RX ENABLE is
@@ -383,24 +360,49 @@ void coretsedma_add_rx_desc(struct altera_tse_private *priv, struct tse_buffer *
         {
             /* Make current descriptor to point to the packet requested */
             dma_inst->first_rx_desc_index = next_rx_desc_index;
-            next_rx_phys = priv->rxdescphys + next_rx_desc_index*sizeof(struct coretse_desc);
-
-            HAL_set_32bit_reg(this_tse->base_addr,
-                              DMARXDESC,
-                              next_rx_phys);
-
-            HAL_set_32bit_reg_field(this_tse->base_addr, DMARXSTATUS_RXPKT_OVR, 0x01);
-            HAL_set_32bit_reg_field(this_tse->base_addr, DMARXCTRL_RX_EN, 0x01);
+            coretsedma_set_rx(priv, next_rx_desc_index);
         }
 
         /* update next_free_rx_desc_index */
         dma_inst->next_free_rx_desc_index = (dma_inst->next_free_rx_desc_index+1)%TSE_RX_RING_SIZE;
-
-        /* sync descriptor */
-        dma_sync_single_for_device(priv->device, priv->rxdescphys,
-                                   priv->rxdescmem, DMA_TO_DEVICE);
     }
     else {
         netdev_err(priv->dev,"%s: no descriptor available! memory leak\n", __func__);
     }
+}
+
+void coretsedma_start_rxdma(struct altera_tse_private *priv)
+{
+    struct coretse_dma_instance *dma_inst = priv->coretse_dma_instance;
+
+    // TEST before setting the first rx packet
+    {
+        struct coretse_desc __iomem * rx_descs = priv->rx_dma_desc;
+        short index = dma_inst->first_rx_desc_index;
+        dma_addr_t rx_phys = priv->rxdescphys + index*sizeof(struct coretse_desc);
+        netdev_dbg(priv->dev, "%s: Desc=0x%llx\n",__func__, rx_phys);
+        netdev_dbg(priv->dev, "%s: Buffer=0x%x Len=0x%x\n",__func__, rx_descs[index].pkt_start_addr, rx_descs[index].pkt_size);
+    }
+
+    /* Make first descriptor to point to the packet requested */
+    coretsedma_set_rx(priv, dma_inst->first_rx_desc_index);
+}
+
+/* 
+ * This function is setting the descriptor number index in the DMA register
+ * for reception.
+ */
+static void coretsedma_set_rx(struct altera_tse_private *priv, short index)
+{
+    struct tmp {
+        struct altera_tse_mac __iomem *base_addr;
+    } _tmp = {priv->mac_dev}, *this_tse = &_tmp;
+    dma_addr_t rx_phys;
+
+    rx_phys = priv->rxdescphys + index*sizeof(struct coretse_desc);
+    rx_phys &= 0xFFFFFFFF;
+    HAL_set_32bit_reg(this_tse->base_addr, DMARXDESC, rx_phys);
+
+    HAL_set_32bit_reg_field(this_tse->base_addr, DMARXSTATUS_RXPKT_OVR, 0x01);
+    HAL_set_32bit_reg_field(this_tse->base_addr, DMARXCTRL_RX_EN, 0x01);
 }

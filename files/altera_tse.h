@@ -609,6 +609,8 @@ struct altera_tse_private {
 
     /* Descriptor memory info for managing coretsedma */
     void *coretse_dma_instance;
+    u32 dma_irq_tx;
+    u32 dma_irq_rx;
     
 	/* Descriptor memory info for managing SGDMA */
 	u32 txdescmem;
