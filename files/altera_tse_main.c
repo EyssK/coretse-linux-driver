@@ -1740,22 +1740,12 @@ static int tse_open(struct net_device *dev)
 	}
 
 	/* Register RX interrupt */
-	ret = request_irq(priv->rx_irq, altera_isr, IRQF_SHARED,
+	ret = request_irq(priv->dma_irq, altera_isr, IRQF_SHARED,
 			  dev->name, dev);
 	if (ret) {
 		netdev_err(dev, "Unable to register RX interrupt %d: %d for dev %p\n",
-			   priv->rx_irq, ret, dev);
+                   priv->dma_irq, ret, dev);
 		goto init_error;
-	}
-
-	/* Register TX interrupt */
-    // Only ONE IRQ with coretse mac
-	ret = request_irq(priv->tx_irq, altera_isr, IRQF_SHARED,
-			  dev->name, dev);
-	if (ret) {
-		netdev_err(dev, "Unable to register TX interrupt %d\n",
-			   priv->tx_irq);
-		goto tx_request_irq_error;
 	}
 
 	/* Enable DMA interrupts */
@@ -1784,8 +1774,6 @@ static int tse_open(struct net_device *dev)
 
 	return 0;
 
-tx_request_irq_error:
-	free_irq(priv->rx_irq, dev);
 init_error:
 	free_skbufs(dev);
 alloc_skbuf_error:
@@ -1818,8 +1806,7 @@ static int tse_shutdown(struct net_device *dev)
 	spin_unlock_irqrestore(&priv->rxdma_irq_lock, flags);
 
 	/* Free the IRQ lines */
-	free_irq(priv->rx_irq, dev);
-	free_irq(priv->tx_irq, dev);
+	free_irq(priv->dma_irq, dev);
 
 	/* disable and reset the MAC, empties fifo */
 	spin_lock(&priv->mac_cfg_lock);
@@ -2076,18 +2063,10 @@ static int coretse_probe(struct platform_device *pdev)
 	*/
 
 
-	/* Rx IRQ */
-	priv->rx_irq = platform_get_irq_byname(pdev, "rx_irq");
-	if (priv->rx_irq == -ENXIO) {
-		dev_err(&pdev->dev, "cannot obtain Rx IRQ\n");
-		ret = -ENXIO;
-		goto err_free_netdev;
-	}
-
-	/* Tx IRQ */
-	priv->tx_irq = platform_get_irq_byname(pdev, "tx_irq");
-	if (priv->tx_irq == -ENXIO) {
-		dev_err(&pdev->dev, "cannot obtain Tx IRQ\n");
+	/* DMA IRQ */
+	priv->dma_irq = platform_get_irq_byname(pdev, "dma_irq");
+    if (priv->dma_irq == -ENXIO) {
+		dev_err(&pdev->dev, "cannot obtain DMA IRQ\n");
 		ret = -ENXIO;
 		goto err_free_netdev;
 	}
@@ -2208,11 +2187,10 @@ static int coretse_probe(struct platform_device *pdev)
 	//priv->revision = ioread32(&priv->mac_dev->megacore_revision);
 
 	if (netif_msg_probe(priv))
-		dev_info(&pdev->dev, "CoreTSE MAC version %d.%d at 0x%08lx irq %d/%d\n",
+		dev_info(&pdev->dev, "CoreTSE MAC version %d.%d at 0x%08lx irq %d\n",
 			 (priv->revision >> 8) & 0xff,
 			 priv->revision & 0xff,
-			 (unsigned long) control_port->start, priv->rx_irq,
-			 priv->tx_irq);
+			 (unsigned long) control_port->start, priv->dma_irq);
 
         
 	ret = init_phy(ndev);

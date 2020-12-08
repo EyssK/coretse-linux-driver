@@ -596,8 +596,7 @@ struct altera_tse_private {
 	u32 tx_ring_size;
 
 	/* Interrupts */
-	u32 tx_irq;
-	u32 rx_irq;
+	u32 dma_irq;
 
 	/* RX/TX MAC FIFO configs */
 	u32 tx_fifo_depth;
