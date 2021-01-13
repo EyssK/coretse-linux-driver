@@ -8,7 +8,7 @@ struct coretse_desc
     volatile u32 pkt_size; /* Packet size & Per packet override flags */
     u32 next_desriptor;    /* Link to next descriptor */
     u32 index;             /* Index: helps in handling interrupts */
-    //void * caller_info;         /* Pointer to user specific data */
+    void * caller_info;         /* Pointer to user specific data */
 };
 
 struct coretse_dma_instance

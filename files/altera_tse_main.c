@@ -55,12 +55,12 @@ static const u32 default_msg_level = (NETIF_MSG_DRV | NETIF_MSG_PROBE |
 					NETIF_MSG_LINK | NETIF_MSG_IFUP |
 					NETIF_MSG_IFDOWN);
 
-#define RX_DESCRIPTORS 64
+#define RX_DESCRIPTORS 4
 int dma_rx_num = RX_DESCRIPTORS;
 module_param(dma_rx_num, int, 0644);
 MODULE_PARM_DESC(dma_rx_num, "Number of descriptors in the RX list");
 
-#define TX_DESCRIPTORS 64
+#define TX_DESCRIPTORS 4
 int dma_tx_num = TX_DESCRIPTORS;
 module_param(dma_tx_num, int, 0644);
 MODULE_PARM_DESC(dma_tx_num, "Number of descriptors in the TX list");
@@ -427,13 +427,13 @@ static int tse_rx(struct altera_tse_private *priv, int limit)
 				 priv->rx_ring[entry].len, DMA_FROM_DEVICE);
 
 		if (netif_msg_pktdata(priv)) {
-			netdev_info(priv->dev, "frame received %d bytes\n",
-				    pktlength);
+			netdev_info(priv->dev, "frame received %d bytes, 0x%llx\n",
+                        pktlength, priv->rx_ring[entry].dma_addr);
 			print_hex_dump(KERN_ERR, "data: ", DUMP_PREFIX_OFFSET,
 				       16, 1, skb->data, pktlength, true);
 		}
 
-		tse_rx_vlan(priv->dev, skb);
+// 		tse_rx_vlan(priv->dev, skb);
 
 		skb->protocol = eth_type_trans(skb, priv->dev);
 		skb_checksum_none_assert(skb);

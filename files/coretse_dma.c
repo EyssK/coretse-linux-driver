@@ -38,7 +38,7 @@ static void rx_desc_ring_init(struct altera_tse_private *priv)
 {
     int inc;
     struct coretse_desc* rx_dma_desc = priv->rx_dma_desc;
-    dma_addr_t next_rx_phys = priv->rxdescphys;
+    dma_addr_t next_rx_phys = priv->rxdescphys + sizeof(struct coretse_desc);
 
     for(inc = 0; inc < TSE_RX_RING_SIZE; ++inc) {
         rx_dma_desc[inc].pkt_start_addr = 0u;
@@ -198,23 +198,28 @@ void coretsedma_clear_txirq(struct altera_tse_private *priv)
 u32 coretsedma_tx_completions(struct altera_tse_private *priv)
 {
     struct coretse_dma_instance *dma_inst;
-    short index;
+    struct coretse_desc __iomem * tx_desc;
+    struct coretse_desc __iomem * tx_descs = priv->tx_dma_desc;
     u32 dma_irq;
 
     dma_inst = priv->coretse_dma_instance;
-    index = dma_inst->first_tx_index;
+    tx_desc = &(tx_descs[dma_inst->first_tx_index]);
 
     spin_lock(&priv->rxdma_irq_lock);
     dma_irq = priv->dma_irq_tx;
     priv->dma_irq_tx = 0;
     spin_unlock(&priv->rxdma_irq_lock);
     if (dma_irq & DMATXSTATUS_TXPKT_SENT_MASK) {
+        // free dma_inst->first_tx_index in case of allocation
+        if (tx_desc->caller_info){
+            dma_unmap_single(priv->device, tx_desc->pkt_start_addr, tx_desc->pkt_size, DMA_TO_DEVICE);
+            kfree(tx_desc->caller_info);
+        }
         ++dma_inst->nb_available_tx_desc;
 
         // Handling Tx one by one
         /* all pending tx packets sent. */
-        dma_inst->first_tx_index = INVALID_INDEX;
-        dma_inst->last_tx_index = INVALID_INDEX;
+        dma_inst->first_tx_index = (dma_inst->first_tx_index + 1) % TSE_TX_RING_SIZE;
     }
     return 1;
 }
@@ -235,6 +240,14 @@ int TSE_send_pkt(struct altera_tse_private *priv, struct tse_buffer *buffer)
         dma_inst->first_tx_index = dma_inst->next_tx_index;
     }
     
+    if (dma_inst->nb_available_tx_desc > 0) {
+        --dma_inst->nb_available_tx_desc;
+    }
+    else {
+        netdev_dbg(priv->dev, "%s: no TX desc available error\n", __func__);
+        return status;
+    }
+        
     dma_inst->last_tx_index = dma_inst->next_tx_index;
     
     p_next_tx_desc = &(tx_descs[dma_inst->next_tx_index]);
@@ -242,7 +255,31 @@ int TSE_send_pkt(struct altera_tse_private *priv, struct tse_buffer *buffer)
     p_next_tx_desc->pkt_size = buffer->len;
     p_next_tx_desc->next_desriptor = 0;
     p_next_tx_desc->index = 0;
-    //p_next_tx_desc->caller_info = 0;
+    p_next_tx_desc->caller_info = 0;
+
+    if ((buffer->dma_addr & 0x3) != 0) {
+        // aligned alloc and copy
+        void* aligned_buffer = kmalloc(buffer->len, GFP_DMA);
+        p_next_tx_desc->caller_info = aligned_buffer;
+        if (!aligned_buffer) {
+            netdev_err(priv->dev, "%s: kmalloc error\n", __func__);
+            return status;
+        }
+        memcpy(aligned_buffer, buffer->skb->data, buffer->len);
+        
+        dma_addr_t dma_reloc = dma_map_single(priv->device, aligned_buffer, buffer->len, DMA_TO_DEVICE);
+        if (dma_mapping_error(priv->device, dma_reloc)) {
+            netdev_err(priv->dev, "%s: DMA mapping error\n", __func__);
+            return status;
+        }
+        netdev_dbg(priv->dev, "%s: unaligned buffer, aligned=0x%p, buffer=0x%llx, virt=0x%p, relloc=0x%llx, caller=0x%p\n", __func__, aligned_buffer, buffer->dma_addr, buffer->skb->data, dma_reloc,p_next_tx_desc->caller_info);
+        p_next_tx_desc->pkt_start_addr = dma_reloc;
+        
+        // Testing skb syncing
+        dma_sync_single_for_device(priv->device, dma_reloc,
+                                   buffer->len, DMA_TO_DEVICE);
+
+    }
 
     next_tx_phys = priv->txdescphys + dma_inst->next_tx_index*sizeof(struct coretse_desc);
     next_tx_phys &= 0xFFFFFFFF;
@@ -252,6 +289,10 @@ int TSE_send_pkt(struct altera_tse_private *priv, struct tse_buffer *buffer)
 //    netdev_dbg(priv->dev, "send dma buffer=\t0x%llx\n", next_tx_phys);
 //    netdev_dbg(priv->dev, "pkt add dma buffer=\t0x%x\n", p_next_tx_desc->pkt_start_addr);
 
+    // Testing skb syncing
+    dma_sync_single_for_device(priv->device, buffer->dma_addr,
+                               buffer->len, DMA_TO_DEVICE);
+    
     dma_sync_single_for_device(priv->device, priv->txdescphys,
                                priv->txdescmem, DMA_TO_DEVICE);
     
@@ -316,6 +357,12 @@ u32 coretsedma_rx_status(struct altera_tse_private *priv) {
                                 DMA_FROM_DEVICE);
         p_next_rx_desc = &rx_descs[dma_inst->first_rx_desc_index];
         rxstatus = (p_next_rx_desc->pkt_size & DMA_DESC_PKT_SIZE_MASK) - 4u;
+
+        // Testing synchronizing skb buffer
+        dma_sync_single_for_cpu(priv->device,
+                                p_next_rx_desc->pkt_start_addr,
+                                p_next_rx_desc->pkt_size,
+                                DMA_FROM_DEVICE);
 
         /* update first_rx_desc_index */
         ++dma_inst->nb_available_rx_desc;
