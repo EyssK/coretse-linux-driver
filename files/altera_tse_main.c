@@ -1597,6 +1597,26 @@ static void assign_station_addr
 
     HAL_set_32bit_reg(this_tse->base_addr, STADDRH, address32);
 
+    netdev_dbg(priv->dev,"%s: %pM\n",__func__, mac_addr);
+
+}
+
+static int change_mac_addr (struct net_device *dev, void *addr) {
+    struct altera_tse_private *priv = netdev_priv(dev);
+    int ret;
+    struct sockaddr *sock_addr = addr;
+
+    ret = eth_prepare_mac_addr_change(dev, sock_addr);
+    if (ret < 0) {
+        netdev_dbg(priv->dev,"%s: eth_prepare_mac_addr_change fails\n",__func__);
+        return ret;
+    }
+
+    netdev_dbg(priv->dev,"%s: %pM\n",__func__, sock_addr->sa_data);
+    assign_station_addr(priv, sock_addr->sa_data);
+
+    eth_commit_mac_addr_change(dev, addr);
+    return 0;
 }
 
 void
@@ -1743,7 +1763,7 @@ static int tse_open(struct net_device *dev)
 	ret = request_irq(priv->dma_irq, altera_isr, IRQF_SHARED,
 			  dev->name, dev);
 	if (ret) {
-		netdev_err(dev, "Unable to register RX interrupt %d: %d for dev %p\n",
+		netdev_err(dev, "Unable to register RX interrupt %d: %d for dev %llx\n",
                    priv->dma_irq, ret, dev);
 		goto init_error;
 	}
@@ -1836,7 +1856,7 @@ static struct net_device_ops altera_tse_netdev_ops = {
 	.ndo_open		= tse_open,
 	.ndo_stop		= tse_shutdown,
 	.ndo_start_xmit		= tse_start_xmit,
-	.ndo_set_mac_address	= eth_mac_addr,
+    .ndo_set_mac_address	= change_mac_addr,
 	.ndo_set_rx_mode	= tse_set_rx_mode,
 	.ndo_change_mtu		= tse_change_mtu,
 	.ndo_validate_addr	= eth_validate_addr,
@@ -1917,6 +1937,30 @@ static void key_test(struct platform_device *pdev) {
 //                            phy_interface_t interface)
 // }
 
+static const void *of_get_mac_addr(struct device_node *np, const char *name)
+{
+    struct property *pp = of_find_property(np, name, NULL);
+
+    if (pp && pp->length == ETH_ALEN)
+        return pp->value;
+    return NULL;
+}
+
+const void *of_get_mac_address(struct device_node *np)
+{
+    const void *addr;
+
+    addr = of_get_mac_addr(np, "mac-address");
+    if (addr)
+        return addr;
+
+    addr = of_get_mac_addr(np, "local-mac-address");
+    if (addr)
+        return addr;
+
+    return of_get_mac_addr(np, "address");
+}
+
 /* Probe Altera TSE MAC device
  */
 static int coretse_probe(struct platform_device *pdev)
@@ -1988,7 +2032,7 @@ static int coretse_probe(struct platform_device *pdev)
 			ret = -EINVAL;
 			goto err_free_netdev;
 		}
-		dev_dbg(&pdev->dev,"tx_dma_desc=0x%p\n", priv->tx_dma_desc);
+		dev_dbg(&pdev->dev,"tx_dma_desc=0x%llx\n", priv->tx_dma_desc);
         dev_dbg(&pdev->dev,"txdescmem=0x%x\n", priv->txdescmem);
         dev_dbg(&pdev->dev,"txdescmem_busaddr=0x%llx\n", priv->txdescmem_busaddr);
 
@@ -2041,7 +2085,7 @@ static int coretse_probe(struct platform_device *pdev)
 // 	priv->mac_dev = (struct altera_tse_mac*)devm_ioremap(&pdev->dev, control_port->start, resource_size(control_port));
 	ret = request_and_map(pdev, "mac_registers", &control_port,
 			      (void __iomem **)&priv->mac_dev);
-    dev_info(&pdev->dev,"control port start 0x%llx size 0x%llx priv->mac_dev 0x%p\n",control_port->start,resource_size(control_port), priv->mac_dev);
+    dev_info(&pdev->dev,"control port start 0x%llx size 0x%llx priv->mac_dev 0x%llx\n",control_port->start,resource_size(control_port), priv->mac_dev);
 	if (!priv->mac_dev) {
 		dev_err(&pdev->dev,"Cannot map MAC address space\n");
 		goto err_free_netdev;
@@ -2127,15 +2171,15 @@ static int coretse_probe(struct platform_device *pdev)
 	 */
 	priv->rx_dma_buf_sz = ALTERA_RXDMABUFFER_SIZE;
 
-	/* get default MAC address from device tree */
-	macaddr = of_get_mac_address(pdev->dev.of_node);
-	if (!IS_ERR(macaddr)) {
-        dev_dbg(&pdev->dev, "MAC found in DT\n");
+    /* get default MAC address from device tree */
+    macaddr = of_get_mac_address(pdev->dev.of_node);
+    if (!IS_ERR(macaddr)) {
         ether_addr_copy(ndev->dev_addr, macaddr);
+        dev_dbg(&pdev->dev, "MAC found in DT %pM\n",ndev->dev_addr);
     }
-	else {
-        dev_dbg(&pdev->dev, "No MAC found in DT\n");
+    else {
         eth_hw_addr_random(ndev);
+        dev_dbg(&pdev->dev, "No MAC found in DT %pM\n",ndev->dev_addr);
     }
 
 	/* get phy addr and create mdio */
