@@ -59,7 +59,7 @@ static void rx_desc_ring_init(struct altera_tse_private *priv)
 int coretsedma_initialize(struct altera_tse_private *priv)
 {
     struct coretse_dma_instance *dma_inst;
-    dev_dbg(priv->device, "%s, priv->rx_dma_desc=0x%llx priv->rxdescmem=0x%x\n",__func__,priv->rx_dma_desc,priv->rxdescmem );
+    dev_dbg(priv->device, "%s, priv->rx_dma_desc=0x%llx priv->rxdescmem=0x%x\n",__func__,(u64)(priv->rx_dma_desc),priv->rxdescmem );
     
     INIT_LIST_HEAD(&priv->txlisthd);
     INIT_LIST_HEAD(&priv->rxlisthd);
@@ -114,7 +114,7 @@ int coretsedma_initialize(struct altera_tse_private *priv)
     dma_inst->first_rx_desc_index = 0;
     
     dev_dbg(priv->device,"coretsedma_initialize priv->txdescphys 0x%llx\n",priv->txdescphys);
-    dev_dbg(priv->device,"coretsedma_initialize priv->tx_dma_desc %llx\n", priv->tx_dma_desc);
+    dev_dbg(priv->device,"coretsedma_initialize priv->tx_dma_desc %llx\n", (u64)(priv->tx_dma_desc));
     
     return 0;
 }
@@ -235,6 +235,7 @@ int TSE_send_pkt(struct altera_tse_private *priv, struct tse_buffer *buffer)
     struct coretse_desc __iomem * tx_descs = priv->tx_dma_desc;
     struct coretse_desc __iomem * p_next_tx_desc;
     dma_addr_t next_tx_phys;
+    dma_addr_t dma_reloc;
     
     if(INVALID_INDEX == dma_inst->first_tx_index) {
         dma_inst->first_tx_index = dma_inst->next_tx_index;
@@ -267,12 +268,13 @@ int TSE_send_pkt(struct altera_tse_private *priv, struct tse_buffer *buffer)
         }
         memcpy(aligned_buffer, buffer->skb->data, buffer->len);
         
-        dma_addr_t dma_reloc = dma_map_single(priv->device, aligned_buffer, buffer->len, DMA_TO_DEVICE);
+        dma_reloc = dma_map_single(priv->device, aligned_buffer, buffer->len, DMA_TO_DEVICE);
         if (dma_mapping_error(priv->device, dma_reloc)) {
             netdev_err(priv->dev, "%s: DMA mapping error\n", __func__);
             return status;
         }
-        netdev_dbg(priv->dev, "%s: unaligned buffer, aligned=0x%llx, buffer=0x%llx, virt=0x%llx, relloc=0x%llx, caller=0x%llx\n", __func__, aligned_buffer, buffer->dma_addr, buffer->skb->data, dma_reloc,p_next_tx_desc->caller_info);
+        // netdev_dbg(priv->dev, "%s: unaligned buffer, aligned=0x%llx, buffer=0x%llx, virt=0x%llx, relloc=0x%llx, caller=0x%llx\n", __func__, aligned_buffer, buffer->dma_addr, buffer->skb->data, dma_reloc,p_next_tx_desc->caller_info);
+        netdev_dbg(priv->dev, "%s: unaligned buffer\n", __func__);
         p_next_tx_desc->pkt_start_addr = dma_reloc;
         
         // Testing skb syncing
@@ -333,9 +335,7 @@ int TSE_send_pkt(struct altera_tse_private *priv, struct tse_buffer *buffer)
  * length is returned in lower 16 bits
  */
 u32 coretsedma_rx_status(struct altera_tse_private *priv) {
-    struct tmp {
-        struct altera_tse_mac __iomem *base_addr;
-    } _tmp = {priv->mac_dev}, *this_tse = &_tmp;
+
     struct coretse_dma_instance *dma_inst = priv->coretse_dma_instance;
     struct coretse_desc __iomem *rx_descs = priv->rx_dma_desc;
     struct coretse_desc __iomem *p_next_rx_desc;

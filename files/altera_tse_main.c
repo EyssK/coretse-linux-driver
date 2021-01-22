@@ -534,6 +534,7 @@ static irqreturn_t altera_isr(int irq, void *dev_id)
 {
 	struct net_device *dev = dev_id;
 	struct altera_tse_private *priv;
+    u32 dma_irq;
 
 	if (unlikely(!dev)) {
 		pr_err("%s: invalid dev pointer\n", __func__);
@@ -541,7 +542,7 @@ static irqreturn_t altera_isr(int irq, void *dev_id)
 	}
 	priv = netdev_priv(dev);
 
-    u32 dma_irq = HAL_get_32bit_reg(priv->mac_dev, DMAINTR);
+    dma_irq = HAL_get_32bit_reg(priv->mac_dev, DMAINTR);
     // netdev_dbg(priv->dev, "%s: dma_irq=0x%x\n", __func__, dma_irq);
     if (!dma_irq) {
         netdev_err(priv->dev,"%s: IRQ but DMA interrupt register is 0\n", __func__);
@@ -1356,6 +1357,7 @@ static void config_mac_hw(struct altera_tse_private * priv, const tse_cfg_t * cf
     if(TSE_ENABLE == cfg->loopback)
     {
         tempreg = CFG1_LOOPBACK_MASK;
+        netdev_info(priv->dev,"Loopback activated\n");
     }
     else
     {
@@ -1514,21 +1516,11 @@ static void update_mac_cfg(struct altera_tse_private * priv, u8 phy_addr)
     netdev_dbg(priv->dev,"%s:%d: CFG1 = 0x%x\n",__func__,__LINE__, HAL_get_32bit_reg(priv->mac_dev,CFG1));
 
     // NO PHY
-// #if (TSE_PHY_INTERFACE == TSE_1000BASEX)
-    // link_up = msgmii_get_link_status(this_tse, &speed, &fullduplex);
-	link_up = TSE_LINK_UP;
-	fullduplex = TSE_FULL_DUPLEX;
-	speed = TSE_MAC1000MBPS;
-// #else
-//     // link_up = TSE_phy_get_link_status(this_tse, phy_addr, &speed, &fullduplex);
-// #endif
+    fullduplex = TSE_FULL_DUPLEX;
+    speed = TSE_MAC1000MBPS;
 
     if(TSE_LINK_DOWN != link_up)
     {
-
-#if (TSE_PHY_INTERFACE == TSE_RGMII)
-        // rgmii_set_link_speed(this_tse, speed);
-#endif
 
         /* Set byte/nibble mode based on interface type and link speed. */
         HAL_set_32bit_reg_field(this_tse->base_addr, CFG2_IF_MODE, 0x00u);
@@ -1764,7 +1756,7 @@ static int tse_open(struct net_device *dev)
 			  dev->name, dev);
 	if (ret) {
 		netdev_err(dev, "Unable to register RX interrupt %d: %d for dev %llx\n",
-                   priv->dma_irq, ret, dev);
+                   priv->dma_irq, ret, (u64)dev);
 		goto init_error;
 	}
 
@@ -1805,10 +1797,9 @@ phy_error:
  */
 static int tse_shutdown(struct net_device *dev)
 {
-	struct altera_tse_private *priv = netdev_priv(dev);
-// 	int ret;
-	unsigned long int flags;
-    
+    struct altera_tse_private *priv = netdev_priv(dev);
+    unsigned long int flags;
+
 	/* Stop the PHY */
 	if (dev->phydev){
         phy_stop(dev->phydev);
@@ -1891,52 +1882,6 @@ static int request_and_map(struct platform_device *pdev, const char *name,
 	return 0;
 }
 
-static void key_test(struct platform_device *pdev) {
-    //struct resource *region = pdev->resource;
-    //struct device *device = &pdev->dev;
-    int i;
-    //tse_instance_t coretse;
-    //tse_cfg_t cfg;
-
-    /* Map the MAC */    
-    
-	/*
-	dev_info(&pdev->dev,"KEY pointers %p %d %d\n", device, region->start, resource_size(region));
-    coretse.base_addr = (unsigned int)devm_ioremap(device, region->start,
-            resource_size(region));
-	*/
-    
-
-    
-    /* Dump mapped area */
-    
-    /*
-	dev_info(&pdev->dev,"Accessing %s 0x%llx 0x%llx\n",region->name, region->start, region->end);
-    dev_info(&pdev->dev,"Mem at 0x%llx\n",region->start);
-    for (i =0; i<8 ; i++) {
-        dev_info(&pdev->dev,"0x%x 0x%x 0x%x 0x%x\n", ((int*)macdata)[i*4], ((int*)macdata)[i*4+1], ((int*)macdata)[i*4+2], ((int*)macdata)[i*4+3]);
-    }
-    */
-
-    /* Send a frame */
-    
-	/* list resources available */
-//     for (i = 0; i < pdev->num_resources; i++) {
-// 		struct resource *r = &pdev->resource[i];
-//         dev_dbg(&pdev->dev,"%d ressource %s type=0x%lx IORESOURCE_MEM=0x%x\n",i, r->name,   resource_type(r), IORESOURCE_MEM);
-//         dev_dbg(&pdev->dev,"start 0x%llx size 0x%llx\n", r->start, resource_size(r));
-//
-// 	}
-	
-}
-
-// void phy_stub(struct net_device *ndev){
-//     struct phy_device phydev;
-//     int phy_connect_direct(ndev, &phydev,
-//                            void (*handler)(struct net_device *),
-//                            phy_interface_t interface)
-// }
-
 static const void *of_get_mac_addr(struct device_node *np, const char *name)
 {
     struct property *pp = of_find_property(np, name, NULL);
@@ -1965,318 +1910,245 @@ const void *of_get_mac_address(struct device_node *np)
  */
 static int coretse_probe(struct platform_device *pdev)
 {
-	struct net_device *ndev;
-	int ret = -ENODEV;
-	struct resource *control_port;
-	struct resource *dma_res;
-	struct altera_tse_private *priv;
-	const unsigned char *macaddr;
-	void __iomem *descmap;
-	const struct of_device_id *of_id = NULL;
+    struct net_device *ndev;
+    int ret = -ENODEV;
+    struct resource *control_port;
+    struct resource *dma_res;
+    struct altera_tse_private *priv;
+    const unsigned char *macaddr;
+    void __iomem *descmap;
+    const struct of_device_id *of_id = NULL;
 
     dev_info(&pdev->dev,"Coretse probing starts\n");
-    
 
     ndev = alloc_etherdev(sizeof(struct altera_tse_private));
     if (!ndev) {
         dev_err(&pdev->dev, "Could not allocate network device\n");
         return -ENODEV;
-	}
+    }
 
-	SET_NETDEV_DEV(ndev, &pdev->dev);
+    SET_NETDEV_DEV(ndev, &pdev->dev);
 
-	priv = netdev_priv(ndev);
-	priv->device = &pdev->dev;
-	priv->dev = ndev;
-	priv->msg_enable = netif_msg_init(debug, default_msg_level);
+    priv = netdev_priv(ndev);
+    priv->device = &pdev->dev;
+    priv->dev = ndev;
+    priv->msg_enable = netif_msg_init(debug, default_msg_level);
 
-	of_id = of_match_device(coretse_ids, &pdev->dev);
+    of_id = of_match_device(coretse_ids, &pdev->dev);
 
-	if (of_id)
-		priv->dmaops = (struct coretse_dmaops *)of_id->data;
-
-
-    key_test(pdev);
+    if (of_id)
+        priv->dmaops = (struct coretse_dmaops *)of_id->data;
     
-	if (priv->dmaops &&
-	    priv->dmaops->coretse_dtype == CORETSE_DMA) {
-		
-		/* Get the mapped address to the SGDMA descriptor memory */
-		ret = request_and_map(pdev, "s1", &dma_res, &descmap);
-		if (ret)
-			goto err_free_netdev;
+    if (priv->dmaops &&
+        priv->dmaops->coretse_dtype == CORETSE_NODMA) {
 
-		/* Start of that memory is for transmit descriptors */
-		priv->tx_dma_desc = descmap;
+        dev_info(&pdev->dev,"CORETSE_NODMA\n");
+    
+        /* MAC address space */
+        ret = request_and_map(pdev, "mac_registers", &control_port,
+                            (void __iomem **)&priv->mac_dev);
+        dev_info(&pdev->dev,"control port start 0x%llx size 0x%llx priv->mac_dev 0x%llx\n",control_port->start,resource_size(control_port), (u64)(priv->mac_dev));
+        if (!priv->mac_dev) {
+            dev_err(&pdev->dev,"Cannot map MAC address space\n");
+            goto err_free_netdev;
+        }
+        
+        macaddr = of_get_mac_address(pdev->dev.of_node);
+        if (!IS_ERR(macaddr)) {
+            ether_addr_copy(ndev->dev_addr, macaddr);
+            dev_dbg(&pdev->dev, "MAC found in DT %pM\n",ndev->dev_addr);
+        }
+        else {
+            eth_hw_addr_random(ndev);
+            dev_dbg(&pdev->dev, "No MAC found in DT %pM\n",ndev->dev_addr);
+        }
+        
+        // we do not register the network device
+        // so we open it manually
+        mac_reset(priv);
+        ret = coretse_open(priv);
+        
+        platform_set_drvdata(pdev, ndev);
 
-		/* First half is for tx descriptors, other half for tx */
+    } else if (priv->dmaops &&
+        priv->dmaops->coretse_dtype == CORETSE_DMA) {
+
+        /* Get the mapped address to the SGDMA descriptor memory */
+        ret = request_and_map(pdev, "s1", &dma_res, &descmap);
+        if (ret)
+            goto err_free_netdev;
+
+        /* Start of that memory is for transmit descriptors */
+        priv->tx_dma_desc = descmap;
+
+        /* First half is for tx descriptors, other half for tx */
         priv->txdescmem = resource_size(dma_res)/2;
 
-		priv->txdescmem_busaddr = (dma_addr_t)dma_res->start;
+        priv->txdescmem_busaddr = (dma_addr_t)dma_res->start;
 
-		priv->rx_dma_desc = (void __iomem *)((uintptr_t)(descmap +
-						     priv->txdescmem));
+        priv->rx_dma_desc = (void __iomem *)((uintptr_t)(descmap +
+                            priv->txdescmem));
         priv->rxdescmem = resource_size(dma_res)/2;
-		priv->rxdescmem_busaddr = dma_res->start;
-		priv->rxdescmem_busaddr += priv->txdescmem;
+        priv->rxdescmem_busaddr = dma_res->start;
+        priv->rxdescmem_busaddr += priv->txdescmem;
 
-		if (upper_32_bits(priv->rxdescmem_busaddr)) {
-			dev_dbg(priv->device,
-				"CORETSE DMA bus addresses greater than 32-bits\n");
-			ret = -EINVAL;
-			goto err_free_netdev;
-		}
-		if (upper_32_bits(priv->txdescmem_busaddr)) {
-			dev_dbg(priv->device,
-				"CORETSE DMA bus addresses greater than 32-bits\n");
-			ret = -EINVAL;
-			goto err_free_netdev;
-		}
-		dev_dbg(&pdev->dev,"tx_dma_desc=0x%llx\n", priv->tx_dma_desc);
+        if (upper_32_bits(priv->rxdescmem_busaddr)) {
+            dev_dbg(priv->device,
+                "CORETSE DMA bus addresses greater than 32-bits\n");
+            ret = -EINVAL;
+            goto err_free_netdev;
+        }
+        if (upper_32_bits(priv->txdescmem_busaddr)) {
+            dev_dbg(priv->device,
+                "CORETSE DMA bus addresses greater than 32-bits\n");
+            ret = -EINVAL;
+            goto err_free_netdev;
+        }
+        dev_dbg(&pdev->dev,"tx_dma_desc=0x%llx\n", (u64)(priv->tx_dma_desc));
         dev_dbg(&pdev->dev,"txdescmem=0x%x\n", priv->txdescmem);
         dev_dbg(&pdev->dev,"txdescmem_busaddr=0x%llx\n", priv->txdescmem_busaddr);
 
-	} else if (priv->dmaops &&
-		   priv->dmaops->coretse_dtype == CORETSE_NODMA) {
-        
-        dev_info(&pdev->dev,"CORETSE_NODMA\n");
-        // not handled yet
-		dev_info(&pdev->dev,"not handled\n");
+        if (!dma_set_mask(priv->device, DMA_BIT_MASK(priv->dmaops->dmamask)))
+            dma_set_coherent_mask(priv->device, DMA_BIT_MASK(priv->dmaops->dmamask));
+        else if (!dma_set_mask(priv->device, DMA_BIT_MASK(32)))
+            dma_set_coherent_mask(priv->device, DMA_BIT_MASK(32));
+        else
         goto err_free_netdev;
-        
-	/*
-		ret = request_and_map(pdev, "rx_resp", &dma_res,
-				      &priv->rx_dma_resp);
-		if (ret)
-			goto err_free_netdev;
 
-		ret = request_and_map(pdev, "tx_desc", &dma_res,
-				      &priv->tx_dma_desc);
-		if (ret)
-			goto err_free_netdev;
+        /* MAC address space */
+        ret = request_and_map(pdev, "mac_registers", &control_port,
+                            (void __iomem **)&priv->mac_dev);
+        dev_info(&pdev->dev,"control port start 0x%llx size 0x%llx priv->mac_dev 0x%llx\n",control_port->start,resource_size(control_port), (u64)(priv->mac_dev));
+        if (!priv->mac_dev) {
+            dev_err(&pdev->dev,"Cannot map MAC address space\n");
+            goto err_free_netdev;
+        }
 
-		priv->txdescmem = resource_size(dma_res);
-		priv->txdescmem_busaddr = dma_res->start;
+        /* DMA IRQ */
+        priv->dma_irq = platform_get_irq_byname(pdev, "dma_irq");
+        if (priv->dma_irq == -ENXIO) {
+            dev_err(&pdev->dev, "cannot obtain DMA IRQ\n");
+            ret = -ENXIO;
+            goto err_free_netdev;
+        }
 
-		ret = request_and_map(pdev, "rx_desc", &dma_res,
-				      &priv->rx_dma_desc);
-		if (ret)
-			goto err_free_netdev;
+        /* Set hash filter to not set for now until the
+        * multicast filter receive issue is debugged
+        */
+        priv->hash_filter = 0;
 
-		priv->rxdescmem = resource_size(dma_res);
-		priv->rxdescmem_busaddr = dma_res->start;
-		*/
+        priv->dev->min_mtu = ETH_ZLEN + ETH_FCS_LEN;
+        /* Max MTU is 1500, ETH_DATA_LEN */
+        priv->dev->max_mtu = ETH_DATA_LEN;
 
-	} else {
-		goto err_free_netdev;
-	}
+        /* The DMA buffer size already accounts for an alignment bias
+        * to avoid unaligned access exceptions for the NIOS processor,
+        */
+        priv->rx_dma_buf_sz = ALTERA_RXDMABUFFER_SIZE;
 
-	if (!dma_set_mask(priv->device, DMA_BIT_MASK(priv->dmaops->dmamask)))
-		dma_set_coherent_mask(priv->device,
-				      DMA_BIT_MASK(priv->dmaops->dmamask));
-	else if (!dma_set_mask(priv->device, DMA_BIT_MASK(32)))
-		dma_set_coherent_mask(priv->device, DMA_BIT_MASK(32));
-	else
-		goto err_free_netdev;
+        /* get default MAC address from device tree */
+        macaddr = of_get_mac_address(pdev->dev.of_node);
+        if (!IS_ERR(macaddr)) {
+            ether_addr_copy(ndev->dev_addr, macaddr);
+            dev_dbg(&pdev->dev, "MAC found in DT %pM\n",ndev->dev_addr);
+        }
+        else {
+            eth_hw_addr_random(ndev);
+            dev_dbg(&pdev->dev, "No MAC found in DT %pM\n",ndev->dev_addr);
+        }
 
-	/* MAC address space */
-// 	control_port = pdev->resource;
+        /* get phy addr and create mdio */
+        ret = altera_tse_phy_get_addr_mdio_create(ndev);
 
-// 	priv->mac_dev = (struct altera_tse_mac*)devm_ioremap(&pdev->dev, control_port->start, resource_size(control_port));
-	ret = request_and_map(pdev, "mac_registers", &control_port,
-			      (void __iomem **)&priv->mac_dev);
-    dev_info(&pdev->dev,"control port start 0x%llx size 0x%llx priv->mac_dev 0x%llx\n",control_port->start,resource_size(control_port), priv->mac_dev);
-	if (!priv->mac_dev) {
-		dev_err(&pdev->dev,"Cannot map MAC address space\n");
-		goto err_free_netdev;
-	}
+        if (ret)
+            goto err_free_netdev;
 
-	/* xSGDMA Rx Dispatcher address space */
-	/*ret = request_and_map(pdev, "rx_csr", &dma_res,
-			      &priv->rx_dma_csr);
-	if (ret)
-		goto err_free_netdev;
-	*/
+        /* initialize netdev */
+        ndev->mem_start = control_port->start;
+        ndev->mem_end = control_port->end;
+        ndev->netdev_ops = &altera_tse_netdev_ops;
+        altera_tse_set_ethtool_ops(ndev);
+
+        altera_tse_netdev_ops.ndo_set_rx_mode = tse_set_rx_mode;
+
+        if (priv->hash_filter)
+            altera_tse_netdev_ops.ndo_set_rx_mode = tse_set_rx_mode_hashfilter;
+
+        /* Scatter/gather IO is not supported,
+        * so it is turned off
+        */
+        ndev->hw_features &= ~NETIF_F_SG;
+        ndev->features |= ndev->hw_features | NETIF_F_HIGHDMA;
+
+        /* VLAN offloading of tagging, stripping and filtering is not
+        * supported by hardware, but driver will accommodate the
+        * extra 4-byte VLAN tag for processing by upper layers
+        */
+        ndev->features |= NETIF_F_HW_VLAN_CTAG_RX;
+
+        /* setup NAPI interface */
+        netif_napi_add(ndev, &priv->napi, tse_poll, NAPI_POLL_WEIGHT);
+
+        spin_lock_init(&priv->mac_cfg_lock);
+        spin_lock_init(&priv->tx_lock);
+        spin_lock_init(&priv->rxdma_irq_lock);
+
+        netif_carrier_off(ndev);
+        ret = register_netdev(ndev);
+        if (ret) {
+            dev_err(&pdev->dev, "failed to register TSE net device\n");
+            goto err_register_netdev;
+        }
+
+        platform_set_drvdata(pdev, ndev);
+
+        //priv->revision = ioread32(&priv->mac_dev->megacore_revision);
+
+        if (netif_msg_probe(priv))
+            dev_info(&pdev->dev, "CoreTSE MAC version %d.%d at 0x%08lx irq %d\n",
+                    (priv->revision >> 8) & 0xff,
+                    priv->revision & 0xff,
+                    (unsigned long) control_port->start, priv->dma_irq);
 
 
-	/* xSGDMA Tx Dispatcher address space */
-	/* ret = request_and_map(pdev, "tx_csr", &dma_res,
-			      &priv->tx_dma_csr);
-	if (ret)
-		goto err_free_netdev;
-	*/
-
-
-	/* DMA IRQ */
-	priv->dma_irq = platform_get_irq_byname(pdev, "dma_irq");
-    if (priv->dma_irq == -ENXIO) {
-		dev_err(&pdev->dev, "cannot obtain DMA IRQ\n");
-		ret = -ENXIO;
-		goto err_free_netdev;
-	}
-
-	/* get FIFO depths from device tree */
-	/*
-	if (of_property_read_u32(pdev->dev.of_node, "rx-fifo-depth",
-				 &priv->rx_fifo_depth)) {
-		dev_err(&pdev->dev, "cannot obtain rx-fifo-depth\n");
-		ret = -ENXIO;
-		goto err_free_netdev;
-	}
-	*/
-
-	/*
-	if (of_property_read_u32(pdev->dev.of_node, "tx-fifo-depth",
-				 &priv->tx_fifo_depth)) {
-		dev_err(&pdev->dev, "cannot obtain tx-fifo-depth\n");
-		ret = -ENXIO;
-		goto err_free_netdev;
-	}
-	*/
-
-	/* get hash filter settings for this instance */
-	/*
-	priv->hash_filter =
-		of_property_read_bool(pdev->dev.of_node,
-				      "altr,has-hash-multicast-filter");
-				      */
-
-	/* Set hash filter to not set for now until the
-	 * multicast filter receive issue is debugged
-	 */
-	priv->hash_filter = 0;
-
-	/* get supplemental address settings for this instance */
-	/*
-	 * priv->added_unicast =
-		of_property_read_bool(pdev->dev.of_node,
-				      "altr,has-supplementary-unicast");
-				      */
-
-	priv->dev->min_mtu = ETH_ZLEN + ETH_FCS_LEN;
-	/* Max MTU is 1500, ETH_DATA_LEN */
-	priv->dev->max_mtu = ETH_DATA_LEN;
-
-	/* Get the max mtu from the device tree. Note that the
-	 * "max-frame-size" parameter is actually max mtu. Definition
-	 * in the ePAPR v1.1 spec and usage differ, so go with usage.
-	 */
-	/*
-	of_property_read_u32(pdev->dev.of_node, "max-frame-size",
-			     &priv->dev->max_mtu);
-			     */
-
-	/* The DMA buffer size already accounts for an alignment bias
-	 * to avoid unaligned access exceptions for the NIOS processor,
-	 */
-	priv->rx_dma_buf_sz = ALTERA_RXDMABUFFER_SIZE;
-
-    /* get default MAC address from device tree */
-    macaddr = of_get_mac_address(pdev->dev.of_node);
-    if (!IS_ERR(macaddr)) {
-        ether_addr_copy(ndev->dev_addr, macaddr);
-        dev_dbg(&pdev->dev, "MAC found in DT %pM\n",ndev->dev_addr);
-    }
-    else {
-        eth_hw_addr_random(ndev);
-        dev_dbg(&pdev->dev, "No MAC found in DT %pM\n",ndev->dev_addr);
-    }
-
-	/* get phy addr and create mdio */
-	ret = altera_tse_phy_get_addr_mdio_create(ndev);
-
-	if (ret)
-		goto err_free_netdev;
-
-	/* initialize netdev */
-	ndev->mem_start = control_port->start;
-	ndev->mem_end = control_port->end;
-	ndev->netdev_ops = &altera_tse_netdev_ops;
-	altera_tse_set_ethtool_ops(ndev);
-
-	altera_tse_netdev_ops.ndo_set_rx_mode = tse_set_rx_mode;
-
-	if (priv->hash_filter)
-		altera_tse_netdev_ops.ndo_set_rx_mode =
-			tse_set_rx_mode_hashfilter;
-
-	/* Scatter/gather IO is not supported,
-	 * so it is turned off
-	 */
-	ndev->hw_features &= ~NETIF_F_SG;
-	ndev->features |= ndev->hw_features | NETIF_F_HIGHDMA;
-
-	/* VLAN offloading of tagging, stripping and filtering is not
-	 * supported by hardware, but driver will accommodate the
-	 * extra 4-byte VLAN tag for processing by upper layers
-	 */
-	ndev->features |= NETIF_F_HW_VLAN_CTAG_RX;
-
-	/* setup NAPI interface */
-	netif_napi_add(ndev, &priv->napi, tse_poll, NAPI_POLL_WEIGHT);
-
-	spin_lock_init(&priv->mac_cfg_lock);
-	spin_lock_init(&priv->tx_lock);
-	spin_lock_init(&priv->rxdma_irq_lock);
-
-	netif_carrier_off(ndev);
-	ret = register_netdev(ndev);
-	if (ret) {
-		dev_err(&pdev->dev, "failed to register TSE net device\n");
-		goto err_register_netdev;
-	}
-
-	platform_set_drvdata(pdev, ndev);
-
-	//priv->revision = ioread32(&priv->mac_dev->megacore_revision);
-
-	if (netif_msg_probe(priv))
-		dev_info(&pdev->dev, "CoreTSE MAC version %d.%d at 0x%08lx irq %d\n",
-			 (priv->revision >> 8) & 0xff,
-			 priv->revision & 0xff,
-			 (unsigned long) control_port->start, priv->dma_irq);
-
-        
-	ret = init_phy(ndev);
-	if (ret != 0) {
-		netdev_err(ndev, "Cannot attach to PHY (error: %d)\n", ret);
-	}
+        ret = init_phy(ndev);
+        if (ret != 0) {
+            netdev_err(ndev, "Cannot attach to PHY (error: %d)\n", ret);
+        }
     
+    } else {
+        goto err_free_netdev;
+    }
 
-	return 0;
+    return 0;
 
-// err_init_phy:
-// 	unregister_netdev(ndev);
 err_register_netdev:
-	netif_napi_del(&priv->napi);
-	altera_tse_mdio_destroy(ndev);
+    netif_napi_del(&priv->napi);
 err_free_netdev:
-	free_netdev(ndev);
-	return ret;
+    free_netdev(ndev);
+    return ret;
 }
 
 /* Remove Altera TSE MAC device
  */
 static int coretse_remove(struct platform_device *pdev)
 {
-	struct net_device *ndev = platform_get_drvdata(pdev);
-	struct altera_tse_private *priv = netdev_priv(ndev);
+    struct net_device *ndev = platform_get_drvdata(pdev);
+    struct altera_tse_private *priv = netdev_priv(ndev);
 
-    dev_info(&pdev->dev,"Coretse removing starts\n");
+    if (ndev->phydev) {
+        phy_disconnect(ndev->phydev);
 
-	if (ndev->phydev) {
-		phy_disconnect(ndev->phydev);
+        if (of_phy_is_fixed_link(priv->device->of_node))
+            of_phy_deregister_fixed_link(priv->device->of_node);
+    }
 
-		if (of_phy_is_fixed_link(priv->device->of_node))
-			of_phy_deregister_fixed_link(priv->device->of_node);
-	}
+    platform_set_drvdata(pdev, NULL);
+    if (priv->dmaops->coretse_dtype != CORETSE_NODMA)
+        unregister_netdev(ndev);
+    free_netdev(ndev);
 
-	platform_set_drvdata(pdev, NULL);
-// 	altera_tse_mdio_destroy(ndev);
-	unregister_netdev(ndev);
-	free_netdev(ndev);
-
-	return 0;
+    return 0;
 }
 
 static const struct coretse_dmaops coretse_dma = {
